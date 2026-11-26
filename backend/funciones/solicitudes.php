@@ -176,7 +176,7 @@ function atenderSolicitud($id, $decision, $comentario)
     $solicitud = $consulta->fetch();
 
     if (!$solicitud) {
-        return ['ok' => false, 'mensaje' => 'La solicitud ya no est&aacute; pendiente.'];
+        return ['ok' => false, 'mensaje' => 'La solicitud ya no está pendiente.'];
     }
 
     $comentario = trim($comentario);
@@ -190,6 +190,23 @@ function atenderSolicitud($id, $decision, $comentario)
     try {
         // La decisión y el estado del vehículo deben guardarse juntos.
         $conexion->beginTransaction();
+
+        if ($decision === 'aprobada') {
+            // el vehículo debe seguir disponible
+            $consulta = $conexion->prepare("SELECT estado FROM vehiculos WHERE id = ? FOR UPDATE");
+            $consulta->execute([(int) $solicitud['vehiculo_id']]);
+            if ($consulta->fetchColumn() !== 'disponible') {
+                $conexion->rollBack();
+                return ['ok' => false, 'mensaje' => 'El vehículo ya fue vendido.'];
+            }
+
+            $consulta = $conexion->prepare(
+                "UPDATE solicitudes
+                SET estado = 'rechazada', comentario = 'El vehículo fue vendido a otro cliente.'
+                WHERE vehiculo_id = ? AND estado = 'pendiente' AND id <> ?"
+            );
+            $consulta->execute([(int) $solicitud['vehiculo_id'], (int) $id]);
+        }
 
         $consulta = $conexion->prepare(
             "UPDATE solicitudes
