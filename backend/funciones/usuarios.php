@@ -34,11 +34,42 @@ function registrarCliente($nombre, $correo, $contrasena, $telefono) {
 }
 
 function iniciarSesion($correo, $contrasena) {
-    return ["ok" => true, "mensaje" => "Sesión iniciada (ejemplo)."];
+    global $conexion;
+
+    $correo = trim($correo);
+
+    if ($correo === "" || $contrasena === "") {
+        return ["ok" => false, "mensaje" => "Escribe tu correo y tu contraseña."];
+    }
+
+    // buscar al usuario activo con ese correo
+    $consulta = $conexion->prepare(
+        "SELECT id, nombre, contrasena, rol FROM usuarios WHERE correo = ? AND activo = 1"
+    );
+    $consulta->execute([$correo]);
+    $usuario = $consulta->fetch();
+
+    // mismo mensaje si el correo no existe o la contraseña está mal
+    if (!$usuario || !password_verify($contrasena, $usuario["contrasena"])) {
+        return ["ok" => false, "mensaje" => "Correo o contraseña incorrectos."];
+    }
+
+    // cambia el id de sesión al entrar (evita robo de sesión)
+    session_regenerate_id(true);
+
+    $_SESSION["usuario_id"] = $usuario["id"];
+    $_SESSION["nombre"] = $usuario["nombre"];
+    $_SESSION["rol"] = $usuario["rol"];
+
+    return ["ok" => true, "mensaje" => "Bienvenido, " . $usuario["nombre"] . "."];
 }
 
 function cerrarSesion() {
-    return ["ok" => true, "mensaje" => "Sesión cerrada (ejemplo)."];
+    // vaciar los datos de la sesión y destruirla
+    $_SESSION = [];
+    session_destroy();
+
+    return ["ok" => true, "mensaje" => "Sesión cerrada."];
 }
 
 function actualizarPerfil($nombre, $telefono, $actual, $nueva) {
