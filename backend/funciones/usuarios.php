@@ -72,6 +72,51 @@ function cerrarSesion() {
     return ["ok" => true, "mensaje" => "Sesión cerrada."];
 }
 
-function actualizarPerfil($nombre, $telefono, $actual, $nueva) {
-    return ["ok" => true, "mensaje" => "Perfil actualizado (ejemplo)."];
+function actualizarPerfil($nombre, $telefono, $contrasenaActual, $contrasenaNueva) {
+    global $conexion;
+
+    // siempre se edita al usuario de la sesión, nunca a uno que venga del formulario
+    if (!isset($_SESSION["usuario_id"])) {
+        return ["ok" => false, "mensaje" => "Debes iniciar sesión."];
+    }
+    $id = $_SESSION["usuario_id"];
+
+    $nombre = trim($nombre);
+    $telefono = trim($telefono);
+
+    if ($nombre === "" || $telefono === "") {
+        return ["ok" => false, "mensaje" => "El nombre y el teléfono son obligatorios."];
+    }
+
+    // si escribió una contraseña nueva, hay que validar la actual
+    if ($contrasenaNueva !== "") {
+        if ($contrasenaActual === "") {
+            return ["ok" => false, "mensaje" => "Escribe tu contraseña actual para cambiarla."];
+        }
+
+        $consulta = $conexion->prepare("SELECT contrasena FROM usuarios WHERE id = ?");
+        $consulta->execute([$id]);
+        $usuario = $consulta->fetch();
+
+        if (!$usuario || !password_verify($contrasenaActual, $usuario["contrasena"])) {
+            return ["ok" => false, "mensaje" => "La contraseña actual no es correcta."];
+        }
+
+        $clave = password_hash($contrasenaNueva, PASSWORD_DEFAULT);
+        $actualizar = $conexion->prepare(
+            "UPDATE usuarios SET nombre = ?, telefono = ?, contrasena = ? WHERE id = ?"
+        );
+        $actualizar->execute([$nombre, $telefono, $clave, $id]);
+    } else {
+        // sin contraseña nueva: solo nombre y teléfono
+        $actualizar = $conexion->prepare(
+            "UPDATE usuarios SET nombre = ?, telefono = ? WHERE id = ?"
+        );
+        $actualizar->execute([$nombre, $telefono, $id]);
+    }
+
+    // que el menú muestre el nombre nuevo sin volver a entrar
+    $_SESSION["nombre"] = $nombre;
+
+    return ["ok" => true, "mensaje" => "Perfil actualizado."];
 }
