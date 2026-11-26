@@ -107,4 +107,4 @@ Mientras el backend las termina, las funciones devuelven **datos de ejemplo** co
 | `vehiculos.php` | Esqueleto (datos de ejemplo) |
 | `solicitudes.php` | Esqueleto (datos de ejemplo) |
 
-Se va actualizando esta tabla a medida que cada archivo pasa a la versión real.git
+Se va actualizando esta tabla a medida que cada archivo pasa a la versión real.
