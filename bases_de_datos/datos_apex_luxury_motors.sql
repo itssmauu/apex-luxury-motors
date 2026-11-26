@@ -38,3 +38,16 @@ INSERT INTO fotos (vehiculo_id, ruta, orden) VALUES
 (10, 'img/McLaren_Spider_3799cc_registered_June_2016.jpg', 1),
 (11, 'img/C7_Corvette_Stingray_Z51_2014.jpg', 1),
 (12, 'img/Ford_MUSTANG_SHELBY_GT350_(S550).jpg', 1);
+
+-- Dos vehiculos mas para tener mas variedad
+INSERT INTO vehiculos (marca, modelo, precio, categoria, descripcion) VALUES
+('Ford', 'Mustang Shelby GT500', 79900.00, 'Deportivo estadounidense',
+ 'Motor V8 sobrealimentado, la versión más potente del Mustang. Pensado para quienes buscan fuerza bruta y carácter.'),
+('McLaren', '570S Spider', 209900.00, 'Superdeportivo',
+ 'Motor V8 biturbo de 3.8 L con unos 570 CV, techo retráctil y chasis de fibra de carbono. La puerta de entrada al mundo McLaren.');
+
+INSERT INTO fotos (vehiculo_id, ruta, orden) VALUES
+((SELECT id FROM vehiculos WHERE marca = 'Ford' AND modelo = 'Mustang Shelby GT500'),
+ 'img/Ford_Mustang_Shelby_GT_500.jpg', 1),
+((SELECT id FROM vehiculos WHERE marca = 'McLaren' AND modelo = '570S Spider'),
+ 'img/McLaren_570S_Spider_IMG_9945.jpg', 1);
