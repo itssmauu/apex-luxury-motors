@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Registra una solicitud pendiente si el cliente y el vehículo son válidos.
 function crearSolicitud($vehiculoId)
 {
     global $conexion;
@@ -55,6 +56,7 @@ function crearSolicitud($vehiculoId)
     return ['ok' => true, 'mensaje' => 'Tu solicitud fue registrada.'];
 }
 
+// Lista únicamente las solicitudes del cliente que inició sesión.
 function listarMisSolicitudes()
 {
     global $conexion;
@@ -75,6 +77,7 @@ function listarMisSolicitudes()
     return $consulta->fetchAll();
 }
 
+// Cancela una solicitud propia solo cuando todavía está pendiente.
 function cancelarSolicitud($id)
 {
     global $conexion;
@@ -107,6 +110,7 @@ function cancelarSolicitud($id)
     return ['ok' => true, 'mensaje' => 'La solicitud fue cancelada.'];
 }
 
+// Lista las solicitudes pendientes para que el administrador las revise.
 function listarPendientes()
 {
     global $conexion;
@@ -128,6 +132,7 @@ function listarPendientes()
     return $consulta->fetchAll();
 }
 
+// Obtiene la información de una solicitud para mostrar su detalle.
 function obtenerSolicitud($id)
 {
     global $conexion;
@@ -149,6 +154,7 @@ function obtenerSolicitud($id)
     return $consulta->fetch() ?: null;
 }
 
+// Aprueba o rechaza una solicitud pendiente y guarda el comentario.
 function atenderSolicitud($id, $decision, $comentario)
 {
     global $conexion;
@@ -182,6 +188,7 @@ function atenderSolicitud($id, $decision, $comentario)
     }
 
     try {
+        // La decisión y el estado del vehículo deben guardarse juntos.
         $conexion->beginTransaction();
 
         $consulta = $conexion->prepare(

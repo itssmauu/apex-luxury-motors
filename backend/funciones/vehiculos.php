@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../config/conexion.php';
 
+// Lista los vehículos activos y aplica los filtros que se hayan recibido.
 function listarVehiculos($marca = '', $categoria = '', $precioMax = null)
 {
     global $conexion;
@@ -38,6 +39,7 @@ function listarVehiculos($marca = '', $categoria = '', $precioMax = null)
     return $consulta->fetchAll();
 }
 
+// Devuelve las marcas activas para llenar el filtro del catálogo.
 function listarMarcas()
 {
     global $conexion;
@@ -50,6 +52,7 @@ function listarMarcas()
     return $consulta->fetchAll();
 }
 
+// Devuelve las categorías activas para llenar el filtro del catálogo.
 function listarCategorias()
 {
     global $conexion;
@@ -62,6 +65,7 @@ function listarCategorias()
     return $consulta->fetchAll();
 }
 
+// Busca un vehículo activo y agrega todas sus fotos ordenadas.
 function obtenerVehiculo($id)
 {
     global $conexion;
