@@ -1,5 +1,6 @@
 <?php
 // el menú cambia según quién esté usando la página
+// (el saludo y "Cerrar sesión" están arriba a la derecha, en encabezado.php)
 $rolMenu = rolActual();
 $raiz = "/apex/frontend";
 ?>
@@ -15,15 +16,11 @@ $raiz = "/apex/frontend";
         <?php elseif ($rolMenu === "cliente"): ?>
             <li><a href="<?php echo $raiz; ?>/mis_solicitudes.php">Mis solicitudes</a></li>
             <li><a href="<?php echo $raiz; ?>/perfil.php">Mi perfil</a></li>
-            <li>Hola, <?php echo htmlspecialchars($_SESSION["nombre"] ?? ""); ?></li>
-            <li><a href="/apex/backend/procesos/logout.php">Cerrar sesión</a></li>
 
         <?php elseif ($rolMenu === "administrador"): ?>
             <li><a href="<?php echo $raiz; ?>/admin/vehiculos.php">Inventario</a></li>
             <li><a href="<?php echo $raiz; ?>/admin/solicitudes.php">Solicitudes</a></li>
             <li><a href="<?php echo $raiz; ?>/perfil.php">Mi perfil</a></li>
-            <li>Hola, <?php echo htmlspecialchars($_SESSION["nombre"] ?? ""); ?></li>
-            <li><a href="/apex/backend/procesos/logout.php">Cerrar sesión</a></li>
         <?php endif; ?>
     </ul>
 </nav>

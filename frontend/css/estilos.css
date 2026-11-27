@@ -383,7 +383,6 @@ main > form h2 {
     gap: var(--e1) var(--e3);
 }
 
-
 /* enlace que se ve como botón dorado ("Ver el catálogo") */
 .boton {
     display: inline-flex;
@@ -519,6 +518,23 @@ main td button:hover {
     margin: 0;
 }
 
+/* ---------- catálogo: cabecera ---------- */
+.catalogo-cabecera {
+    margin-bottom: var(--e4);
+}
+
+.catalogo-cabecera h1 {
+    margin-bottom: var(--e1);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+.catalogo-conteo {
+    margin: 0;
+    color: var(--gris-claro);
+}
+
 /* ---------- catálogo: tarjetas ---------- */
 /* 4 columnas en pantallas anchas (abajo cambian según el ancho) */
 .tarjetas {
@@ -527,58 +543,157 @@ main td button:hover {
     gap: var(--e3);
 }
 
+/* position relative: el enlace "estira" su zona de clic a toda la tarjeta */
 .tarjeta {
+    position: relative;
     display: flex;
     flex-direction: column;
-    background: var(--tarjeta);
+    overflow: hidden;
+    border: 1px solid var(--linea);
     border-radius: 4px;
-    overflow: hidden;              /* recorta la foto cuando se acerca */
-    padding-bottom: var(--e3);
+    background: var(--tarjeta);
+    transition: border-color 300ms var(--curva);
 }
 
-/* la foto llega a los bordes de la tarjeta (4:3) */
-.tarjeta img {
+.tarjeta:hover,
+.tarjeta:focus-within {
+    border-color: rgba(216, 189, 138, 0.6);
+}
+
+/* la foto, ancha (16:10), con una sombra suave abajo */
+.tarjeta-foto {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: #0b0d10;
+}
+
+.tarjeta-foto img {
     display: block;
     width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3;
+    height: 100%;
     object-fit: cover;
-    transform-origin: center bottom;   /* crece hacia arriba, no tapa el nombre */
-    transition: transform 400ms var(--curva);
+    transition: transform 700ms var(--curva);
 }
 
-/* al pasar el mouse o al llegar con el teclado, la foto se acerca un poco */
-.tarjeta:hover img,
-.tarjeta:focus-within img {
-    transform: scale(1.05);
+.tarjeta-foto::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 0;
+    background: linear-gradient(rgba(27, 31, 37, 0), rgba(27, 31, 37, 0.6));
+    pointer-events: none;
 }
 
-/* texto mínimo: nombre, precio, estado y enlace */
-.tarjeta h3 {
-    font-size: 1.375rem;
-    font-weight: 600;
-    font-stretch: 75%;
-    margin: var(--e2) var(--e3) var(--e1);
+/* al pasar el mouse o llegar con el teclado, la foto se acerca */
+.tarjeta:hover .tarjeta-foto img,
+.tarjeta:focus-within .tarjeta-foto img {
+    transform: scale(1.06);
 }
 
-.tarjeta p {
-    margin: 0 var(--e3);
+.sin-foto {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    margin: 0;
     color: var(--gris-claro);
     font-size: 0.875rem;
 }
 
-.tarjeta .precio {
+/* sello del estado, arriba a la izquierda de la foto */
+.sello {
+    position: absolute;
+    z-index: 1;
+    top: 12px;
+    left: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(17, 20, 24, 0.82);
     color: var(--hueso);
-    font-size: 1.125rem;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
-/* el enlace queda siempre abajo, aunque el nombre ocupe dos líneas */
-.tarjeta > a {
-    margin: auto var(--e3) 0;
-    padding-top: var(--e2);
+.sello-vendido {
+    background: var(--rojo-fondo);
+    color: var(--rojo-vendido);
+}
+
+.tarjeta-cuerpo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--e3);
+}
+
+.tarjeta-categoria {
+    margin: 0 0 var(--e1);
+    color: var(--dorado);
+    font-size: 0.75rem;
     font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.tarjeta h3 {
+    margin: 0 0 var(--e2);
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 1.05;
+    text-transform: uppercase;
+}
+
+.tarjeta .precio {
+    margin: 0;
+    color: var(--hueso);
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.tarjeta .precio span {
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+/* el enlace queda siempre abajo; su ::after cubre toda la tarjeta,
+   así se puede hacer clic en cualquier parte */
+.tarjeta-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e1);
+    margin-top: auto;
+    padding-top: var(--e3);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.tarjeta-enlace::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.tarjeta-enlace span {
+    display: inline-block;
+    transition: transform 200ms var(--curva);
+}
+
+.tarjeta:hover .tarjeta-enlace span {
+    transform: translateX(4px);
+}
+
+/* con el teclado, el contorno se dibuja en toda la tarjeta */
+.tarjeta:has(.tarjeta-enlace:focus-visible) {
+    outline: 3px solid var(--dorado);
+    outline-offset: 2px;
+}
+
+.tarjeta-enlace:focus-visible {
+    outline: none;
 }
 
 /* ---------- estado vendido ---------- */
@@ -1003,49 +1118,62 @@ p.vendido {
     border: 0;
 }
 
-/* ---------- menú encima del video ----------
+/* ---------- menú encima del video o de la foto ----------
+   (portada y detalle del vehículo)
    El body se vuelve una cuadrícula: logo, menú y aviso van en las filas 1 a 3,
    y el contenido (main) ocupa las filas 1 a 4, así queda debajo de ellos */
-.pagina-inicio {
+.pagina-inicio,
+.pagina-vehiculo {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto 1fr auto;
 }
 
 .pagina-inicio > header,
+.pagina-vehiculo > header,
 .pagina-inicio > nav,
-.pagina-inicio > .mensaje {
+.pagina-vehiculo > nav,
+.pagina-inicio > .mensaje,
+.pagina-vehiculo > .mensaje {
     grid-column: 1;
     position: relative;
     z-index: 2;                   /* por encima del video */
 }
 
-.pagina-inicio > header { grid-row: 1; }
-.pagina-inicio > nav { grid-row: 2; }
-.pagina-inicio > .mensaje { grid-row: 3; align-self: start; }
+.pagina-inicio > header,
+.pagina-vehiculo > header { grid-row: 1; }
+.pagina-inicio > nav,
+.pagina-vehiculo > nav { grid-row: 2; }
+.pagina-inicio > .mensaje,
+.pagina-vehiculo > .mensaje { grid-row: 3; align-self: start; }
 
-.pagina-inicio > main {
+.pagina-inicio > main,
+.pagina-vehiculo > main {
     grid-column: 1;
     grid-row: 1 / 5;
     max-width: none;
     padding: 0;
 }
 
-.pagina-inicio > footer {
+.pagina-inicio > footer,
+.pagina-vehiculo > footer {
     grid-column: 1;
     grid-row: 5;
 }
 
 /* sobre el video, la línea del menú es blanca suave */
-.pagina-inicio > nav {
+.pagina-inicio > nav,
+.pagina-vehiculo > nav {
     border-bottom-color: rgba(255, 255, 255, 0.18);
 }
 
-.pagina-inicio > nav a {
+.pagina-inicio > nav a,
+.pagina-vehiculo > nav a {
     color: #ffffff;
 }
 
-.pagina-inicio > nav li {
+.pagina-inicio > nav li,
+.pagina-vehiculo > nav li {
     color: rgba(255, 255, 255, 0.75);
 }
 
@@ -1461,11 +1589,6 @@ p.vendido {
     transform: translateX(4px);
 }
 
-/* en la portada las tarjetas van siempre de a 4 en pantallas anchas */
-.seccion .tarjetas {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
 /* ---------- bandas con video de fondo ---------- */
 .banda {
     position: relative;
@@ -1588,12 +1711,6 @@ p.vendido {
 }
 
 /* ---------- portada en tableta y celular ---------- */
-@media (max-width: 1199px) {
-    .seccion .tarjetas {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (max-width: 900px) {
     .quienes,
     .pasos {
@@ -1634,10 +1751,6 @@ p.vendido {
         width: 180px;
     }
 
-    .seccion .tarjetas {
-        grid-template-columns: 1fr;
-    }
-
     .banda .video-pausa {
         bottom: var(--e2);
     }
@@ -1656,5 +1769,1070 @@ p.vendido {
 
     .hero-diapositiva {
         transition: none;
+    }
+}
+
+/* =====================================================================
+   PORTADA, PARTE 2: cuenta arriba a la derecha, filtros, destacados en
+   mosaico y aparición al hacer scroll
+   ===================================================================== */
+
+/* ---------- encabezado: logo al centro y cuenta a la derecha ----------
+   tres columnas: vacía | logo | cuenta. Así el logo queda centrado
+   aunque la cuenta ocupe espacio a la derecha */
+header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: start;
+    gap: var(--e2);
+}
+
+.logo {
+    grid-column: 2;
+}
+
+/* cuenta: una píldora oscura con borde dorado, arriba a la derecha.
+   Se distingue sobre el fondo de la página y sobre los videos */
+.cuenta {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    padding: 6px;
+    border: 1px solid rgba(216, 189, 138, 0.5);
+    border-radius: 999px;
+    background: rgba(17, 20, 24, 0.82);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);  /* difumina lo que pasa detrás (el video) */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* círculo dorado con la inicial del nombre */
+.cuenta-inicial {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--dorado);
+    color: var(--fondo);
+    font-weight: 700;
+}
+
+.cuenta-texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+/* si el nombre es muy largo se corta con "…" */
+.cuenta-saludo {
+    max-width: 200px;
+    overflow: hidden;
+    color: var(--hueso);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cuenta-rol {
+    color: var(--dorado-claro);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+/* "Cerrar sesión": botón claro, se nota sin gritar */
+.cuenta-salir {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 var(--e2);
+    border-radius: 999px;
+    background: var(--hueso);
+    color: var(--fondo);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.cuenta-salir:hover {
+    background: #ffffff;
+    color: var(--fondo);
+    text-decoration: none;
+}
+
+/* ---------- buscador del catálogo: título pequeño y botón dorado ---------- */
+.filtros h2 {
+    font-size: 0.875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dorado);
+}
+
+.filtros button {
+    background: var(--dorado);
+}
+
+.filtros button:hover {
+    background: var(--dorado-claro);
+}
+
+/* ---------- destacados: mosaico ----------
+   4 columnas; la primera pieza ocupa 2 columnas y 2 filas */
+.mosaico {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: clamp(240px, 22vw, 340px);
+    gap: var(--e2);
+}
+
+/* la foto llena la pieza y el texto va encima, abajo */
+.pieza {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    padding: var(--e3);
+    border-radius: 4px;
+    background: var(--tarjeta);
+    color: #ffffff;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+.pieza:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+    padding: var(--e4);
+}
+
+.pieza img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 900ms var(--curva);
+}
+
+/* sombra para que el texto se lea sobre cualquier foto */
+.pieza::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.6) 55%, rgba(0, 0, 0, 0.92));
+}
+
+.pieza:hover img,
+.pieza:focus-within img {
+    transform: scale(1.06);
+}
+
+.pieza-categoria {
+    margin: 0 0 var(--e1);
+    color: var(--dorado-claro);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.pieza h3 {
+    margin: 0 0 var(--e1);
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.pieza:first-child h3 {
+    font-size: clamp(2rem, 3.6vw, 3.5rem);
+}
+
+.pieza-precio {
+    margin: 0 0 var(--e2);
+    color: #e8e4dc;
+    font-variant-numeric: tabular-nums;
+}
+
+.pieza-enlace {
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.pieza-enlace:hover {
+    color: var(--dorado-claro);
+}
+
+/* toda la pieza es clicable */
+.pieza-enlace::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+/* ---------- aparición al hacer scroll ----------
+   Solo si hay JavaScript (clase con-js en <html>). --i escalona:
+   cada elemento sale 90 ms después del anterior */
+.con-js .revelar {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 800ms var(--curva), transform 800ms var(--curva);
+    transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+.con-js .revelar.visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* la flecha de "Ver vehículo" se mueve al pasar el mouse */
+.pieza-enlace span {
+    display: inline-block;
+    transition: transform 200ms var(--curva);
+}
+
+.pieza:hover .pieza-enlace span {
+    transform: translateX(4px);
+}
+
+/* con el teclado, el contorno se dibuja en toda la pieza */
+.pieza:has(.pieza-enlace:focus-visible) {
+    outline: 3px solid var(--dorado);
+    outline-offset: 2px;
+}
+
+.pieza-enlace:focus-visible {
+    outline: none;
+}
+
+/* ---------- parte 2 en tableta y celular ---------- */
+@media (max-width: 1199px) {
+    /* mosaico de 2 columnas: la primera a todo el ancho */
+    .mosaico {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: clamp(240px, 36vw, 360px);
+    }
+
+    .pieza:first-child {
+        grid-row: span 1;
+    }
+}
+
+@media (max-width: 700px) {
+    /* la cuenta va en su propia fila, arriba del logo */
+    header {
+        grid-template-columns: 1fr;
+    }
+
+    .cuenta {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .logo {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .cuenta-saludo {
+        max-width: 130px;
+    }
+
+    /* mosaico en una columna */
+    .mosaico {
+        grid-template-columns: 1fr;
+    }
+
+    .pieza:first-child {
+        grid-column: auto;
+        padding: var(--e3);
+    }
+}
+
+/* menos movimiento: todo visible de una vez, sin acercar fotos ni mover flechas */
+@media (prefers-reduced-motion: reduce) {
+    .con-js .revelar {
+        opacity: 1;
+        transform: none;
+    }
+
+    .tarjeta:hover .tarjeta-foto img,
+    .tarjeta:focus-within .tarjeta-foto img,
+    .pieza:hover img,
+    .pieza:focus-within img,
+    .tarjeta:hover .tarjeta-enlace span,
+    .pieza:hover .pieza-enlace span {
+        transform: none;
+    }
+}
+/* =====================================================================
+   DETALLE DEL VEHÍCULO (vehiculo.php)
+   Idea: como las páginas de modelo de las marcas de lujo. Foto a pantalla
+   completa, una barra con las secciones que se queda arriba, y "escenas":
+   la foto se queda fija (sticky) mientras la información pasa por encima.
+   ===================================================================== */
+
+/* al tocar un enlace de la barra, baja suave (si la persona no pidió menos movimiento) */
+@media (prefers-reduced-motion: no-preference) {
+    html:has(.pagina-vehiculo) {
+        scroll-behavior: smooth;
+    }
+}
+
+/* el contenido nunca más ancho que la pantalla (la lista de la barra se desliza de lado).
+   Hace falta porque main tiene margin auto, y en la cuadrícula eso lo deja crecer con su contenido */
+.pagina-vehiculo > main {
+    width: 100%;
+    min-width: 0;
+}
+
+/* que la barra pegada arriba no tape el título al llegar a una sección */
+.pagina-vehiculo main section[id] {
+    scroll-margin-top: 64px;
+}
+
+/* ---------- 1. portada del modelo ---------- */
+.modelo-portada {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    height: 100vh;
+    height: 100svh;
+    min-height: 620px;
+    overflow: hidden;
+    background: #000000;
+    color: #ffffff;
+}
+
+.modelo-portada-foto {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* sombra arriba (logo y menú) y abajo a la izquierda (nombre y precio) */
+.modelo-portada::before,
+.modelo-portada::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.modelo-portada::before {
+    bottom: auto;
+    height: 340px;
+    background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+.modelo-portada::after {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.55) 70%, rgba(0, 0, 0, 0.9)),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0) 60%);
+}
+
+.modelo-portada-texto {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 0 clamp(16px, 5vw, 96px) clamp(64px, 11vh, 120px);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* el texto sube y aparece al cargar, uno tras otro */
+.modelo-portada-texto > * {
+    animation: modelo-aparecer 900ms var(--curva) both;
+}
+
+.modelo-portada-texto > :nth-child(2) { animation-delay: 120ms; }
+.modelo-portada-texto > :nth-child(3) { animation-delay: 240ms; }
+.modelo-portada-texto > :nth-child(4) { animation-delay: 360ms; }
+
+@keyframes modelo-aparecer {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+}
+
+/* "← Catálogo": pequeño, arriba del nombre */
+.modelo-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e1);
+    min-height: 44px;
+    margin-bottom: var(--e2);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.modelo-volver:hover {
+    color: var(--dorado-claro);
+    text-decoration: none;
+}
+
+.modelo-volver span {
+    transition: transform 160ms var(--curva);
+}
+
+.modelo-volver:hover span {
+    transform: translateX(-4px);
+}
+
+.modelo-portada .sobretitulo {
+    color: var(--dorado-claro);
+}
+
+/* el nombre del modelo, enorme; la marca encima, más pequeña y espaciada */
+.modelo-nombre {
+    max-width: 14ch;
+    margin: 0 0 var(--e3);
+    font-size: clamp(3rem, 9vw, 8.5rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 0.88;
+    text-transform: uppercase;
+}
+
+.modelo-marca {
+    display: block;
+    margin-bottom: var(--e2);
+    font-size: clamp(1rem, 1.6vw, 1.5rem);
+    font-stretch: 100%;
+    letter-spacing: 0.3em;
+    line-height: 1;
+}
+
+.modelo-precio {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e1) var(--e2);
+    margin: 0;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.modelo-precio > span:first-child {
+    color: #d6d1c8;
+    font-size: 0.6em;
+}
+
+/* el sello del catálogo, pero en línea con el precio */
+.modelo-precio .sello {
+    position: static;
+    text-shadow: none;
+}
+
+/* una línea que baja: invita a hacer scroll */
+.modelo-bajar {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    bottom: 0;
+    width: 1px;
+    height: 56px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.modelo-bajar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--dorado-claro);
+    animation: modelo-bajar 2200ms var(--curva) infinite;
+}
+
+@keyframes modelo-bajar {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(100%); }
+}
+
+/* ---------- barra del modelo (pegada arriba al hacer scroll) ---------- */
+.modelo-barra {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: var(--e3);
+    height: 64px;
+    padding: 0 clamp(16px, 5vw, 96px);
+    border-bottom: 1px solid var(--linea);
+    background: rgba(11, 13, 16, 0.88);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.modelo-barra-nombre {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-stretch: 75%;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.modelo-barra ul {
+    display: flex;
+    flex-wrap: nowrap;            /* el menú general baja de línea; esta barra no */
+    justify-content: flex-start;
+    gap: var(--e3);
+    margin: 0 0 0 auto;
+    padding: 0;
+    list-style: none;
+}
+
+.modelo-barra ul a {
+    display: block;
+    padding: var(--e1) 0;
+    color: var(--hueso);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.modelo-barra ul a:hover {
+    color: var(--dorado-claro);
+}
+
+.modelo-barra-boton {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 var(--e3);
+    border-radius: 4px;
+    background: var(--dorado);
+    color: var(--fondo);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.modelo-barra-boton:hover {
+    background: var(--dorado-claro);
+    color: var(--fondo);
+    text-decoration: none;
+}
+
+/* ---------- escenas: la foto fija y la información encima ----------
+   La foto (escena-fondo) mide una pantalla y es sticky: se queda pegada
+   arriba mientras dure su escena. El contenido sube una pantalla con un
+   margen negativo, así queda encima de la foto y pasa por delante de ella. */
+.escena {
+    position: relative;
+    background: #000000;
+    color: #ffffff;
+}
+
+.escena-fondo {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+}
+
+.escena-fondo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* sombra suave para que los paneles se lean sobre cualquier foto */
+.escena-fondo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.05) 65%),
+        linear-gradient(rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.55));
+}
+
+.escena-oscura .escena-fondo::after {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.escena-contenido {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 70vh;                    /* entre panel y panel se vuelve a ver la foto sola */
+    padding: clamp(72px, 11vw, 160px) clamp(16px, 5vw, 96px);
+}
+
+/* solo cuando hay foto: el contenido sube una pantalla y empieza más abajo,
+   así primero se ve la foto limpia y después aparece el texto */
+.escena-fondo + .escena-contenido {
+    margin-top: -100vh;
+    margin-top: -100svh;
+    padding-top: 80vh;
+    padding-bottom: 60vh;
+}
+
+.escena-panel {
+    width: min(520px, 100%);
+    padding: var(--e4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    background: rgba(11, 13, 16, 0.72);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.escena-panel p {
+    margin: 0 0 var(--e2);
+    color: #e8e4dc;
+    font-size: 1.125rem;
+}
+
+.escena-panel > :last-child {
+    margin-bottom: 0;
+}
+
+.escena-panel-derecha {
+    align-self: flex-end;
+}
+
+.escena-panel-ancho {
+    width: min(760px, 100%);
+}
+
+.escena-titulo {
+    margin-bottom: var(--e2);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+.escena-panel p.escena-dato {
+    margin-bottom: var(--e1);
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* lista de dato: valor (Tracción, Peso; y Marca, Modelo en "Solicitar") */
+.escena-lista {
+    margin: 0;
+}
+
+.escena-lista div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--e2);
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.escena-lista div:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.escena-lista dt {
+    color: var(--gris-claro);
+}
+
+.escena-lista dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* cifras de rendimiento: número grande arriba y su nombre abajo */
+.modelo-cifras {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--e4) var(--e3);
+    margin: var(--e3) 0 0;
+}
+
+.modelo-cifras div {
+    display: flex;
+    flex-direction: column-reverse;   /* dd (número) arriba, dt (nombre) abajo */
+    gap: 6px;
+    padding-top: var(--e2);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.modelo-cifras dd {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.modelo-cifras dt {
+    color: #cfcac1;
+    font-size: 0.875rem;
+}
+
+/* ---------- videos (solo si existen los archivos) ---------- */
+.modelo-video {
+    position: relative;
+    height: 90vh;
+    overflow: hidden;
+    background: #000000;
+}
+
+.modelo-video-archivo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modelo-video .video-pausa {
+    position: absolute;
+    right: clamp(16px, 5vw, 96px);
+    bottom: clamp(16px, 4vh, 40px);
+}
+
+/* ---------- galería de vistas ---------- */
+.visor-estado {
+    display: flex;
+    align-items: baseline;
+    gap: var(--e2);
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.visor-cuenta {
+    color: var(--gris-claro);
+    font-variant-numeric: tabular-nums;
+}
+
+.visor {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    max-height: 70vh;             /* que quepa en la pantalla junto con las miniaturas */
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #000000;
+}
+
+#visor-foto {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 180ms var(--curva);
+}
+
+#visor-foto.cambiando {
+    opacity: 0;
+}
+
+.visor-flecha {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1;
+    transform: translateY(-50%);
+}
+
+.visor-flecha:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.visor-flecha:active {
+    transform: translateY(-50%) scale(0.96);
+}
+
+.visor-flecha[hidden] {
+    display: none;
+}
+
+.visor-anterior { left: var(--e2); }
+.visor-siguiente { right: var(--e2); }
+
+.visor-miniaturas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--e2);
+    margin: var(--e2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.visor-miniatura {
+    display: block;
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.visor-miniatura img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    opacity: 0.55;
+    transition: opacity 200ms var(--curva), border-color 200ms var(--curva);
+}
+
+.visor-miniatura span {
+    display: block;
+    margin-top: var(--e1);
+}
+
+.visor-miniatura:hover {
+    color: var(--hueso);
+}
+
+.visor-miniatura:hover img {
+    opacity: 1;
+}
+
+/* la vista que se está mostrando: borde dorado */
+.visor-miniatura[aria-current="true"] {
+    color: var(--hueso);
+}
+
+.visor-miniatura[aria-current="true"] img {
+    border-color: var(--dorado);
+    opacity: 1;
+}
+
+/* ---------- especificaciones técnicas ---------- */
+.ficha-tablas {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+    margin-top: clamp(40px, 5vw, 64px);
+}
+
+.ficha-tecnica caption {
+    padding-bottom: var(--e2);
+    color: var(--dorado);
+    font-size: 0.875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.ficha-tecnica th,
+.ficha-tecnica td {
+    padding-top: var(--e2);
+    padding-bottom: var(--e2);
+}
+
+.ficha-tecnica th {
+    width: 11em;
+    color: var(--gris-claro);
+    font-weight: 400;
+}
+
+.ficha-tecnica td {
+    font-variant-numeric: tabular-nums;
+}
+
+.ficha-tecnica .nota {
+    margin: var(--e4) 0 0;
+    color: var(--gris-claro);
+    font-size: 0.875rem;
+}
+
+/* ---------- solicitar compra ---------- */
+.solicitar-cuadro {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(32px, 6vw, 120px);
+    align-items: end;
+}
+
+.solicitar-precio {
+    margin: var(--e3) 0 0;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    font-variant-numeric: tabular-nums;
+}
+
+.solicitar-precio span {
+    color: var(--gris-claro);
+    font-size: 1rem;
+    font-stretch: 100%;
+    font-weight: 400;
+}
+
+.solicitar-ficha {
+    padding: var(--e4);
+    border: 1px solid var(--linea);
+    border-radius: 4px;
+    background: var(--tarjeta);
+}
+
+.solicitar .accion p + a {
+    margin-top: var(--e2);
+}
+
+/* ---------- detalle en tableta y celular ---------- */
+@media (max-width: 900px) {
+    .modelo-barra-nombre {
+        display: none;
+    }
+
+    .modelo-barra ul {
+        margin-left: 0;
+    }
+
+    .ficha-tablas,
+    .solicitar-cuadro {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    /* barra más baja; los enlaces se deslizan de lado si no caben */
+    .modelo-barra {
+        gap: var(--e2);
+        height: 56px;
+        padding-right: var(--e2);
+    }
+
+    .modelo-barra ul {
+        flex: 1;
+        min-width: 0;             /* sin esto la lista no se encoge y ensancha la página */
+        gap: var(--e2);
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .modelo-barra ul a {
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+    }
+
+    .modelo-barra-boton {
+        height: 36px;
+        padding: 0 12px;
+        font-size: 0.8125rem;
+    }
+
+    .pagina-vehiculo main section[id] {
+        scroll-margin-top: 56px;
+    }
+
+    .escena-contenido {
+        gap: 55vh;
+    }
+
+    .escena-fondo + .escena-contenido {
+        padding-top: 70vh;
+        padding-bottom: 35vh;
+    }
+
+    .escena-panel {
+        padding: var(--e3);
+    }
+
+    .escena-panel p {
+        font-size: 1rem;
+    }
+
+    .modelo-cifras {
+        gap: var(--e3) var(--e2);
+    }
+
+    .visor {
+        aspect-ratio: 4 / 3;
+    }
+
+    .visor-flecha {
+        width: 44px;
+        height: 44px;
+    }
+
+    .visor-miniaturas {
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: 12px;
+    }
+
+    .visor-miniatura {
+        font-size: 0.6875rem;
+        letter-spacing: 0.06em;
+    }
+
+    .solicitar-ficha {
+        padding: var(--e3);
+    }
+
+    .ficha-tecnica th {
+        width: 7.5em;
+    }
+}
+
+/* menos movimiento: sin animaciones de entrada ni la línea que baja */
+@media (prefers-reduced-motion: reduce) {
+    .modelo-portada-texto > *,
+    .modelo-bajar::after {
+        animation: none;
+    }
+
+    .modelo-volver:hover span {
+        transform: none;
     }
 }
