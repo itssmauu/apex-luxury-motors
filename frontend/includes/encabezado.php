@@ -20,7 +20,7 @@ if (!isset($claseBody)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo htmlspecialchars($titulo); ?> - Apex Luxury Motors (demo)</title>
     <!-- estilos de todo el sitio; subir el ?v= cuando cambie el CSS para que el navegador baje la versión nueva -->
-    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=9">
+    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=11">
 </head>
 <body<?php if ($claseBody !== "") { echo ' class="' . htmlspecialchars($claseBody) . '"'; } ?>>
 <header>

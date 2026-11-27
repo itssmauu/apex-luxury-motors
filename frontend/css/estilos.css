@@ -304,17 +304,105 @@ nav a:hover {
     background: var(--rojo-vendido);
 }
 
-/* pie de página */
+/* ---------- pie de página ----------
+   Columnas pequeñas de enlaces, una línea fina arriba
+   y una barra final con el copyright */
 footer {
     border-top: 1px solid var(--linea);
-    padding: var(--e3) clamp(16px, 2vw, 32px);
-    text-align: center;
+    padding: var(--e4) clamp(16px, 2vw, 32px) var(--e3);
     font-size: 0.875rem;
+    line-height: 1.5;
     color: var(--gris-claro);
+    background: var(--fondo);
 }
 
 footer p {
     margin: 0;
+}
+
+/* en pantallas anchas, una columna igual por cada bloque del pie:
+   3 si están Explorar, Cuenta y Por categoría; 2 si falta Por categoría.
+   Así no queda un hueco a la derecha (abajo cambian según el ancho) */
+.pie-columnas {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--e3) var(--e4);
+    max-width: 2200px;
+    margin: 0 auto;
+}
+
+/* el pie también es un <nav>: se quitan los estilos del menú de arriba */
+footer nav {
+    border-bottom: 0;
+}
+
+footer nav ul {
+    display: block;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+footer nav li {
+    color: inherit;
+    font-size: inherit;
+}
+
+footer nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0;
+    color: var(--gris-claro);
+    font-weight: 400;
+    text-decoration: none;
+}
+
+footer nav a:hover {
+    color: var(--dorado-claro);
+    text-decoration: underline;
+}
+
+/* el título de cada columna, pequeño y discreto */
+.pie-columna h2 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--hueso);
+    margin-bottom: var(--e1);
+}
+
+/* barra final: línea fina arriba y texto más chico */
+.pie-legal {
+    max-width: 2200px;
+    margin: var(--e4) auto 0;
+    padding-top: var(--e2);
+    border-top: 1px solid var(--linea);
+    font-size: 0.75rem;
+}
+
+.pie-legal p {
+    margin-bottom: 4px;
+}
+
+/* tableta: 2 columnas (los bloques bajan de fila) */
+@media (max-width: 899px) {
+    .pie-columnas {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* celular: 1 columna y enlaces más altos, fáciles de tocar */
+@media (max-width: 599px) {
+    .pie-columnas {
+        grid-template-columns: 1fr;
+    }
+
+    footer nav a {
+        min-height: 44px;
+    }
 }
 
 /* ---------- formularios sueltos (login, registro, perfil y los de admin) ---------- */
