@@ -4049,9 +4049,205 @@ button.boton-linea {
     list-style: none;
 }
 
-/* invitación final sin video: solo el alto de su contenido */
-.sobre-llamado {
-    min-height: 0;
+/* ---------- video que se agranda con el scroll ----------
+   La sección mide más que una pantalla y el marco es sticky: se queda fijo
+   mientras se baja. --zoom (0 a 1) lo pone js/zoom_scroll.js; sin JavaScript
+   o con menos movimiento vale 1 y el video se ve completo desde el principio. */
+.sobre-video {
+    --zoom: 1;
+    --cierre-x: 20%;   /* cuánto se cierra la ventana por los lados con --zoom 0 */
+    --cierre-y: 14%;   /* y por arriba y abajo */
+    position: relative;
+    height: 180vh;
+    background: #000000;
+}
+
+.sobre-video-marco {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    /* con --zoom 0 es una ventana con margen y esquinas redondeadas; con 1, toda la pantalla */
+    clip-path: inset(calc((1 - var(--zoom)) * var(--cierre-y)) calc((1 - var(--zoom)) * var(--cierre-x)) round calc((1 - var(--zoom)) * 24px));
+}
+
+.sobre-video-archivo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* el video empieza un poco acercado y se aleja mientras la ventana se abre */
+    transform: scale(calc(1.2 - var(--zoom) * 0.2));
+}
+
+/* sombra abajo para que el texto se lea sobre el video */
+.sobre-video-marco::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.7));
+    pointer-events: none;
+}
+
+/* el texto y el botón se mueven con el borde de la ventana, así nunca quedan cortados */
+.sobre-video-texto {
+    position: absolute;
+    left: calc(clamp(16px, 5vw, 96px) + (1 - var(--zoom)) * var(--cierre-x));
+    right: calc(clamp(16px, 5vw, 96px) + (1 - var(--zoom)) * var(--cierre-x));
+    bottom: calc(clamp(48px, 10vh, 120px) + (1 - var(--zoom)) * var(--cierre-y));
+    z-index: 1;
+    opacity: var(--zoom);
+    transform: translateY(calc((1 - var(--zoom)) * 60px));
+}
+
+.sobre-video-titulo {
+    max-width: 12ch;
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(2.5rem, 7vw, 6.5rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+.sobre-video .video-pausa {
+    position: absolute;
+    right: calc(clamp(16px, 5vw, 96px) + (1 - var(--zoom)) * var(--cierre-x));
+    bottom: calc(clamp(48px, 10vh, 120px) + (1 - var(--zoom)) * var(--cierre-y));
+    z-index: 2;
+}
+
+/* las cifras crecen al entrar en la pantalla (el número, desde su esquina de abajo) */
+.sobre-cifras dd {
+    transform: scale(calc(0.7 + var(--zoom, 1) * 0.3));
+    transform-origin: left bottom;
+}
+
+/* el título de la invitación final también crece un poco al llegar */
+.sobre-llamado .titulo-grande {
+    transform: scale(calc(0.85 + var(--zoom, 1) * 0.15));
+    transform-origin: left center;
+}
+
+/* celular: menos recorrido y la ventana empieza menos cerrada */
+@media (max-width: 599px) {
+    .sobre-video {
+        --cierre-x: 6%;
+        --cierre-y: 10%;
+        height: 150vh;
+    }
+
+    .sobre-video .video-pausa {
+        bottom: auto;
+        top: 72px;
+    }
+}
+
+/* ---------- bandas con video de fondo (inicio, lo que ofrecemos y el final) ----------
+   Usan .banda de la portada; aquí el video empieza un poco acercado y se aleja
+   al entrar en la pantalla (--zoom lo pone js/zoom_scroll.js) */
+.sobre-pagina .banda[data-zoom] .banda-video {
+    transform: scale(calc(1.15 - var(--zoom, 1) * 0.15));
+}
+
+/* inicio: título, texto y cifras uno debajo del otro, sobre el video */
+.sobre-inicio {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100svh;
+}
+
+.sobre-inicio::before {
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.65) 60%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+.sobre-inicio .quienes-texto p {
+    color: #e8e4dc;
+}
+
+.sobre-inicio .cifras {
+    border-top-color: rgba(255, 255, 255, 0.3);
+}
+
+.sobre-inicio .cifras div + div {
+    border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.sobre-inicio .cifras dt {
+    color: #dcd8d0;
+}
+
+/* lo que ofrecemos: el texto ocupa todo el ancho, la sombra es pareja */
+.sobre-ofrecemos::before {
+    background: rgba(0, 0, 0, 0.68);
+}
+
+/* ---------- secciones divididas: texto y una ventana vertical con video ---------- */
+.sobre-dividido {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
+    gap: clamp(32px, 6vw, 120px);
+    align-items: center;
+}
+
+/* "Explora por categoría": el video va a la izquierda */
+.sobre-dividido-invertido {
+    grid-template-columns: minmax(240px, 420px) minmax(0, 1fr);
+}
+
+/* los pasos uno debajo del otro, porque comparten el ancho con el video */
+.sobre-dividido .pasos {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.sobre-ventana {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    max-height: 82vh;
+    justify-self: center;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #000000;
+    /* crece al entrar en la pantalla y se achica al salir */
+    transform: scale(calc(0.8 + var(--zoom, 1) * 0.2));
+}
+
+.sobre-ventana-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(calc(1.2 - var(--zoom, 1) * 0.2));
+}
+
+.sobre-ventana .video-pausa {
+    position: absolute;
+    right: var(--e2);
+    bottom: var(--e2);
+}
+
+/* tableta y celular: una sola columna, la ventana más chica y arriba del texto */
+@media (max-width: 900px) {
+    .sobre-dividido,
+    .sobre-dividido-invertido {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sobre-ventana {
+        max-width: 320px;
+        max-height: 70vh;
+    }
+
+    .sobre-dividido > .sobre-ventana {
+        order: -1;
+    }
 }
 
 .sobre-llamado .llamado-botones {
