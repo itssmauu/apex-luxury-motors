@@ -4149,9 +4149,7 @@ button.boton-linea {
 /* ---------- bandas con video de fondo (inicio, lo que ofrecemos y el final) ----------
    Usan .banda de la portada; aquí el video empieza un poco acercado y se aleja
    al entrar en la pantalla (--zoom lo pone js/zoom_scroll.js) */
-.sobre-pagina .banda[data-zoom] .banda-video {
-    transform: scale(calc(1.15 - var(--zoom, 1) * 0.15));
-}
+/* (el video de fondo que se aleja al entrar está junto con el de solicitudes, más abajo) */
 
 /* inicio: título, texto y cifras uno debajo del otro, sobre el video */
 .sobre-inicio {
@@ -5265,3 +5263,471 @@ main > .gama-grupo:last-of-type,
         padding-bottom: 260px;    /* en el celular el aviso es más alto */
     }
 }
+
+/* =====================================================================
+   SOLICITUDES (mis_solicitudes.php, admin/solicitudes.php y admin/solicitud.php)
+   Mismo diseño que el inventario: banda con video arriba, cifras y una fila
+   por solicitud con la foto del auto. El detalle: foto grande y paneles.
+   ===================================================================== */
+main.solicitudes-pagina {
+    max-width: none;
+    padding: 0 0 var(--e6);
+}
+
+/* banda de arriba (usa .banda de la portada) */
+.solicitudes-portada {
+    min-height: 52vh;
+    padding: clamp(72px, 9vw, 140px) 0 clamp(48px, 6vw, 88px);
+    align-items: flex-end;
+}
+
+.solicitudes-portada .titulo-grande {
+    margin: 0;
+    max-width: none;
+}
+
+.sobre-pagina .banda[data-zoom] .banda-video,
+.solicitudes-pagina .banda[data-zoom] .banda-video {
+    transform: scale(calc(1.15 - var(--zoom, 1) * 0.15));
+}
+
+.solicitudes-bajada {
+    max-width: 52ch;
+    margin: var(--e3) 0 0;
+    color: #e8e4dc;
+    font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+}
+
+.solicitudes-contenido {
+    padding-top: clamp(40px, 5vw, 72px);
+}
+
+.solicitudes-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--e3);
+    padding: clamp(48px, 8vw, 112px) var(--e3);
+    border: 1px solid var(--linea);
+    border-radius: 6px;
+    background: var(--tarjeta);
+    color: var(--gris-claro);
+    font-size: 1.125rem;
+    text-align: center;
+}
+
+.solicitudes-vacio p {
+    margin: 0;
+}
+
+.solicitudes-mas {
+    margin: var(--e4) 0 0;
+}
+
+/* cifras de 3 columnas (solicitudes del administrador): siempre en una fila,
+   también en tableta y celular (anula el "de 2 en 2" de la portada) */
+.cifras.cifras-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cifras.cifras-3 div:nth-child(n + 3) {
+    margin-top: 0;
+    border-top: 0;
+}
+
+.cifras.cifras-3 div:nth-child(3) {
+    padding-left: var(--e3);
+    border-left: 1px solid var(--linea);
+}
+
+.solicitudes-cifras {
+    margin: 0 0 clamp(32px, 4vw, 56px);
+}
+
+/* el número crece al entrar en la pantalla (--zoom lo pone zoom_scroll.js) */
+.solicitudes-cifras dd {
+    transform: scale(calc(0.7 + var(--zoom, 1) * 0.3));
+    transform-origin: left bottom;
+}
+
+/* ---------- sellos de estado de la solicitud ----------
+   el texto dice el estado; el color solo ayuda */
+.estado-sello-pendiente {
+    border-color: var(--borde-campo);
+    color: var(--hueso);
+}
+
+.estado-sello-aprobada {
+    border-color: transparent;
+    background: rgba(186, 154, 107, 0.18);
+    color: var(--dorado-claro);
+}
+
+.estado-sello-rechazada {
+    border-color: transparent;
+    background: var(--rojo-fondo);
+    color: var(--rojo-vendido);
+}
+
+.estado-sello-cancelada {
+    border-color: var(--linea);
+    color: var(--gris-claro);
+}
+
+.estado-sello-grande {
+    padding: 6px 16px;
+    font-size: 0.875rem;
+}
+
+/* ---------- fila del cliente: foto | auto | respuesta | acciones ---------- */
+/* la última columna tiene ancho fijo: así la respuesta empieza a la misma altura en todas las filas */
+.solicitud-fila {
+    grid-template-columns: 200px minmax(0, 1fr) minmax(0, 1.1fr) 230px;
+}
+
+.solicitud-respuesta {
+    min-width: 0;
+}
+
+.solicitud-respuesta-titulo {
+    margin: 0 0 var(--e1);
+    color: var(--gris-claro);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+/* el comentario del equipo, como una cita con línea dorada */
+.solicitud-respuesta-texto {
+    margin: 0;
+    padding: 4px 0 4px var(--e2);
+    border-left: 2px solid var(--dorado);
+    color: var(--hueso);
+}
+
+.solicitud-respuesta-texto p {
+    margin: 0;
+}
+
+.solicitud-respuesta-espera {
+    border-left-color: var(--linea);
+    color: var(--gris-claro);
+    font-style: italic;
+}
+
+/* ---------- fila del administrador: foto | auto | cliente | espera | revisar ---------- */
+.solicitud-fila-admin {
+    grid-template-columns: 200px minmax(0, 1fr) 280px 120px auto;
+}
+
+.solicitud-cliente {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* la inicial en un círculo, como en el encabezado de la cuenta */
+.solicitud-inicial {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--dorado);
+    border-radius: 50%;
+    color: var(--dorado-claro);
+    font-weight: 700;
+}
+
+.solicitud-cliente-nombre {
+    margin: 0;
+    font-weight: 600;
+}
+
+.solicitud-cliente-correo {
+    margin: 0;
+    overflow: hidden;
+    color: var(--gris-claro);
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* cuánto lleva esperando, y la fecha debajo */
+.solicitud-espera {
+    margin: 0;
+    color: var(--gris-claro);
+    font-size: 0.875rem;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.solicitud-espera span {
+    display: block;
+    color: var(--hueso);
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.solicitud-revisar {
+    height: 44px;
+    padding: 0 var(--e3);
+}
+
+/* ---------- detalle de una solicitud (admin) ---------- */
+.solicitud-volver {
+    display: inline-block;
+    margin-bottom: var(--e3);
+}
+
+.solicitud-volver:hover span {
+    transform: translateX(-4px);
+}
+
+.solicitud-detalle .inventario-cabecera h1 .inventario-marca {
+    margin-bottom: 10px;
+}
+
+/* foto grande a la izquierda y los paneles a la derecha */
+.solicitud-rejilla {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+    gap: clamp(24px, 3vw, 48px);
+    align-items: start;
+}
+
+.solicitud-auto {
+    margin: 0;
+    position: sticky;
+    top: var(--e3);
+}
+
+.solicitud-auto-foto {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #0b0d10;
+}
+
+.solicitud-auto-foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 900ms var(--curva);
+}
+
+.solicitud-auto:hover .solicitud-auto-foto img {
+    transform: scale(1.04);
+}
+
+.solicitud-auto-foto span {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--gris-claro);
+}
+
+.solicitud-auto-datos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e2) var(--e3);
+    padding: var(--e3) 0 0;
+}
+
+.solicitud-auto-datos .inventario-precio {
+    font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+}
+
+.solicitud-auto-datos .inventario-ver {
+    margin-left: auto;
+}
+
+.solicitud-paneles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e3);
+}
+
+/* cada panel: tarjeta oscura con borde fino */
+.solicitud-panel {
+    padding: clamp(24px, 2.6vw, 36px);
+    border: 1px solid var(--linea);
+    border-radius: 6px;
+    background: var(--tarjeta);
+}
+
+.solicitud-panel p {
+    margin: 0 0 var(--e2);
+}
+
+.solicitud-panel-titulo {
+    margin: 0 0 var(--e3);
+    color: var(--dorado);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.solicitud-cliente-grande {
+    margin-bottom: var(--e3);
+}
+
+.solicitud-cliente-grande .solicitud-inicial {
+    width: 52px;
+    height: 52px;
+    font-size: 1.25rem;
+}
+
+.solicitud-cliente-grande .solicitud-cliente-nombre {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-stretch: 75%;
+    text-transform: uppercase;
+}
+
+.solicitud-lista {
+    font-size: 1rem;
+}
+
+.solicitud-lista dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.solicitud-lista dd a {
+    color: var(--hueso);
+}
+
+.solicitud-lista dd a:hover {
+    color: var(--dorado-claro);
+}
+
+/* aviso antes de decidir: qué pasa al aprobar */
+.solicitud-aviso {
+    padding: 12px var(--e2);
+    border-left: 3px solid var(--dorado);
+    border-radius: 2px;
+    background: rgba(186, 154, 107, 0.08);
+    color: #dcd8d0;
+    font-size: 0.9375rem;
+}
+
+.solicitud-aviso-error {
+    border-left-color: var(--rojo-vendido);
+    background: var(--rojo-fondo);
+}
+
+.solicitud-decision .campo label span {
+    color: var(--gris-claro);
+    opacity: 0.8;
+}
+
+.solicitud-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e2);
+    margin-top: var(--e3);
+}
+
+.solicitud-botones button {
+    flex: 1 1 160px;
+    height: 52px;
+}
+
+/* Aprobar: dorado, la acción principal */
+.solicitud-aprobar {
+    background: var(--dorado);
+    color: var(--fondo);
+}
+
+.solicitud-aprobar:hover {
+    background: var(--dorado-claro);
+}
+
+/* Rechazar: rojo suave con borde */
+.solicitud-rechazar {
+    border: 1px solid rgba(255, 139, 130, 0.5);
+}
+
+/* ---------- solicitudes en pantallas medianas y celular ---------- */
+@media (max-width: 1100px) {
+    .solicitud-fila {
+        grid-template-columns: 160px minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .solicitud-fila .inventario-acciones {
+        grid-column: 2 / -1;
+    }
+
+    .solicitud-fila-admin {
+        grid-template-columns: 160px minmax(0, 1fr) auto;
+    }
+
+    .solicitud-fila-admin .solicitud-cliente {
+        grid-column: 2;
+    }
+
+    .solicitud-fila-admin .solicitud-espera {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .solicitud-rejilla {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .solicitud-auto {
+        position: static;
+    }
+}
+
+@media (max-width: 700px) {
+    .solicitudes-portada {
+        min-height: 40vh;
+    }
+
+    .solicitudes-cifras div,
+    .cifras.cifras-3 div:nth-child(3) {
+        padding-left: var(--e1);
+        padding-right: var(--e1);
+    }
+
+    .solicitud-fila,
+    .solicitud-fila-admin {
+        grid-template-columns: 112px minmax(0, 1fr);
+    }
+
+    .solicitud-respuesta,
+    .solicitud-fila-admin .solicitud-cliente,
+    .solicitud-fila-admin .solicitud-espera {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+
+    .solicitud-espera {
+        text-align: left;
+    }
+
+    .solicitud-espera span {
+        display: inline;
+        margin-right: var(--e1);
+    }
+
+    .solicitud-auto-datos .inventario-ver {
+        margin-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .solicitud-auto:hover .solicitud-auto-foto img,
+    .solicitud-volver:hover span {
+        transform: none;
+    }
+}
+
