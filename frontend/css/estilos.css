@@ -2924,3 +2924,53 @@ header {
         transform: none;
     }
 }
+
+/* =====================================================================
+   SOBRE NOSOTROS (sobre_nosotros.php)
+   Usa las mismas secciones de la portada; aquí solo van los ajustes
+   ===================================================================== */
+
+/* las secciones van de borde a borde, como en la portada */
+.sobre-pagina {
+    max-width: none;
+    padding: 0;
+}
+
+/* aquí hay 3 cifras, no 4 */
+.sobre-cifras {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* un botón con borde por categoría; si no caben, bajan de línea */
+.sobre-categorias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e2);
+    margin: clamp(32px, 4vw, 56px) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* invitación final sin video: solo el alto de su contenido */
+.sobre-llamado {
+    min-height: 0;
+}
+
+.sobre-llamado .llamado-botones {
+    margin-top: var(--e4);
+}
+
+/* tableta: las cifras de 2 en 2, igual que en la portada */
+@media (max-width: 900px) {
+    .sobre-cifras {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* celular: cada categoría a todo el ancho, más fácil de tocar */
+@media (max-width: 599px) {
+    .sobre-categorias li,
+    .sobre-categorias a {
+        width: 100%;
+    }
+}

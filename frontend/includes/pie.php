@@ -24,6 +24,7 @@ try {
             <ul>
                 <li><a href="<?php echo $raizPie; ?>/index.php">Inicio</a></li>
                 <li><a href="<?php echo $raizPie; ?>/catalogo.php">Catálogo</a></li>
+                <li><a href="<?php echo $raizPie; ?>/sobre_nosotros.php">Sobre nosotros</a></li>
             </ul>
         </div>
 

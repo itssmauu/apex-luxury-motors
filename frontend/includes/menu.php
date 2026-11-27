@@ -8,6 +8,7 @@ $raiz = "/apex/frontend";
     <ul>
         <li><a href="<?php echo $raiz; ?>/index.php">Inicio</a></li>
         <li><a href="<?php echo $raiz; ?>/catalogo.php">Catálogo</a></li>
+        <li><a href="<?php echo $raiz; ?>/sobre_nosotros.php">Sobre nosotros</a></li>
 
         <?php if ($rolMenu === "visitante"): ?>
             <li><a href="<?php echo $raiz; ?>/login.php">Iniciar sesión</a></li>
