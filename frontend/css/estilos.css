@@ -3241,3 +3241,789 @@ header {
         transition: none;
     }
 }
+
+/* =====================================================================
+   INVENTARIO (admin/vehiculos.php)
+   Encabezado grande, cifras que también filtran y una fila por vehículo
+   con la foto, los datos, el precio y las acciones.
+   ===================================================================== */
+main.inventario {
+    width: min(1440px, 100% - 2 * clamp(16px, 5vw, 96px));
+    max-width: none;
+    padding: clamp(40px, 6vw, 72px) 0 var(--e6);
+}
+
+.inventario-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--e3);
+    margin-bottom: clamp(32px, 4vw, 48px);
+}
+
+.inventario-cabecera h1 {
+    margin: 0;
+    font-size: clamp(2.75rem, 6vw, 5rem);
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+.inventario-agregar {
+    gap: var(--e1);
+}
+
+.inventario-agregar span {
+    font-size: 1.375rem;
+    line-height: 1;
+}
+
+/* ---------- cifras / filtros ----------
+   es un <nav>: aquí se anulan los estilos del menú general */
+.inventario-filtros {
+    border-bottom: 0;
+    margin-bottom: clamp(32px, 4vw, 56px);
+}
+
+.inventario-filtros ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--linea);
+}
+
+.inventario-filtros li + li {
+    border-left: 1px solid var(--linea);
+}
+
+/* cada cifra es un enlace: número grande arriba, nombre abajo */
+.inventario-filtros a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e1);
+    margin-top: -1px;             /* la línea dorada queda encima de la línea gris */
+    padding: var(--e3);
+    border-top: 2px solid transparent;
+    color: var(--hueso);
+    text-decoration: none;
+    transition: border-color 200ms var(--curva), background-color 200ms var(--curva);
+}
+
+.inventario-filtros a:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--hueso);
+    text-decoration: none;
+}
+
+/* el filtro elegido: línea dorada arriba y el número en dorado */
+.inventario-filtros a[aria-current="page"] {
+    border-top-color: var(--dorado);
+}
+
+.inventario-filtros a[aria-current="page"] .inventario-cifra {
+    color: var(--dorado-claro);
+}
+
+.inventario-cifra {
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.inventario-cifra-nombre {
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* ---------- lista de vehículos ---------- */
+.inventario-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--linea);
+}
+
+/* foto | datos | precio | acciones */
+.inventario-fila {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--e3) clamp(24px, 3vw, 48px);
+    padding: var(--e3) 0;
+    border-bottom: 1px solid var(--linea);
+}
+
+.inventario-foto {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #0b0d10;
+}
+
+.inventario-foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 600ms var(--curva);
+}
+
+.inventario-fila:hover .inventario-foto img {
+    transform: scale(1.05);
+}
+
+.inventario-foto span {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+}
+
+.inventario-categoria {
+    margin: 0 0 var(--e1);
+    color: var(--dorado);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.inventario-nombre {
+    margin: 0 0 12px;
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* la marca pequeña y espaciada, encima del modelo */
+.inventario-marca {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+    font-stretch: 100%;
+    letter-spacing: 0.24em;
+}
+
+.inventario-sellos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e1);
+    margin: 0;
+}
+
+/* sellos de estado: el texto dice el estado, el color solo ayuda */
+.estado-sello {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border: 1px solid;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.estado-sello-disponible {
+    border-color: rgba(216, 189, 138, 0.5);
+    color: var(--dorado-claro);
+}
+
+.estado-sello-vendido {
+    border-color: transparent;
+    background: var(--rojo-fondo);
+    color: var(--rojo-vendido);
+}
+
+.estado-sello-oculto {
+    border-color: var(--borde-campo);
+    color: var(--gris-claro);
+}
+
+.inventario-precio {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.inventario-precio span {
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+.inventario-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--e1) var(--e2);
+}
+
+.inventario-acciones form {
+    margin: 0;
+}
+
+.inventario-ver {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.inventario-ver span {
+    display: inline-block;
+    transition: transform 160ms var(--curva);
+}
+
+.inventario-ver:hover span {
+    transform: translateX(4px);
+}
+
+/* botón con borde (Editar) */
+.boton-linea {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 var(--e3);
+    border: 1px solid var(--borde-campo);
+    border-radius: 4px;
+    color: var(--hueso);
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 160ms var(--curva), background-color 160ms var(--curva);
+}
+
+/* cuando es un <button>, sin el fondo hueso de los botones normales */
+button.boton-linea {
+    background: transparent;
+}
+
+.boton-linea:hover {
+    border-color: var(--hueso);
+    background: var(--campo);
+    color: var(--hueso);
+    text-decoration: none;
+}
+
+/* Desactivar: discreto, en rojo suave */
+.boton-quitar {
+    height: 40px;
+    padding: 0 var(--e2);
+    background: transparent;
+    color: var(--rojo-vendido);
+}
+
+.boton-quitar:hover {
+    background: var(--rojo-fondo);
+}
+
+/* los que están fuera del catálogo se ven apagados */
+.inventario-fila-inactiva .inventario-foto img {
+    filter: grayscale(1);
+    opacity: 0.45;
+}
+
+.inventario-fila-inactiva .inventario-nombre {
+    color: var(--gris-claro);
+}
+
+.inventario-vacio {
+    padding: var(--e6) 0;
+    border-top: 1px solid var(--linea);
+    color: var(--gris-claro);
+    text-align: center;
+}
+
+.inventario-vacio p {
+    margin: 0 0 var(--e1);
+}
+
+/* ---------- inventario en pantallas medianas y celular ---------- */
+@media (max-width: 1100px) {
+    /* las acciones bajan a una segunda línea, debajo de los datos */
+    .inventario-fila {
+        grid-template-columns: 160px minmax(0, 1fr) auto;
+    }
+
+    .inventario-acciones {
+        grid-column: 2 / -1;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 700px) {
+    .inventario-agregar {
+        width: 100%;
+    }
+
+    /* cifras de 2 en 2 */
+    .inventario-filtros ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .inventario-filtros li:nth-child(3) {
+        border-left: 0;
+    }
+
+    .inventario-filtros li:nth-child(n + 3) {
+        border-top: 1px solid var(--linea);
+    }
+
+    .inventario-filtros a {
+        padding: var(--e2);
+    }
+
+    /* foto pequeña a la izquierda; precio y acciones debajo de los datos */
+    .inventario-fila {
+        grid-template-columns: 112px minmax(0, 1fr);
+        align-items: start;
+        gap: 12px var(--e2);
+    }
+
+    .inventario-precio {
+        grid-column: 2;
+        font-size: 1.125rem;
+    }
+
+    .inventario-acciones {
+        grid-column: 1 / -1;
+    }
+
+    .inventario-nombre {
+        font-size: 1.375rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .inventario-fila:hover .inventario-foto img,
+    .inventario-ver:hover span {
+        transform: none;
+    }
+}
+
+/* =====================================================================
+   AGREGAR / EDITAR VEHÍCULO (admin/vehiculo_form.php)
+   Formulario por secciones a la izquierda, vista previa de la tarjeta
+   a la derecha y, al editar, las fotos en cuadrícula abajo.
+   ===================================================================== */
+.ficha-admin-volver {
+    margin-bottom: var(--e1);
+}
+
+.ficha-admin-nombre {
+    margin: var(--e1) 0 0;
+    color: var(--gris-claro);
+    font-size: 1.125rem;
+}
+
+.ficha-admin-cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+}
+
+.ficha-admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e3);
+}
+
+/* cada sección es una tarjeta. La leyenda flota para que quede adentro
+   de la tarjeta y no encima del borde (así se dibuja un fieldset normal) */
+.ficha-admin-seccion {
+    min-width: 0;
+    margin: 0;
+    padding: var(--e4);
+    border: 1px solid var(--linea);
+    border-radius: 4px;
+    background: var(--tarjeta);
+}
+
+.ficha-admin-seccion > legend,
+.perfil-clave > legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+}
+
+.ficha-admin-seccion > legend {
+    margin-bottom: 20px;
+    color: var(--dorado);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.ficha-admin-seccion > legend + * {
+    clear: both;
+}
+
+.ficha-admin-seccion > :not(legend) + :not(legend) {
+    margin-top: 20px;
+}
+
+.campo-ayuda {
+    margin: var(--e1) 0 0;
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+}
+
+.ficha-admin textarea {
+    min-height: 140px;
+}
+
+/* estado: dos opciones grandes; la elegida con borde dorado */
+.opciones-estado {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--e2);
+}
+
+.opcion-estado {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 12px;
+    padding: var(--e2);
+    border: 1px solid var(--borde-campo);
+    border-radius: 4px;
+    background: var(--campo);
+    cursor: pointer;
+    transition: border-color 160ms var(--curva), background-color 160ms var(--curva);
+}
+
+.opcion-estado:hover {
+    border-color: var(--hueso);
+}
+
+.opcion-estado input {
+    grid-row: span 2;
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    accent-color: var(--dorado);
+}
+
+.opcion-estado-nombre {
+    font-weight: 600;
+}
+
+.opcion-estado-ayuda {
+    grid-column: 2;
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+}
+
+.opcion-estado:has(input:checked) {
+    border-color: var(--dorado);
+    background: rgba(186, 154, 107, 0.08);
+}
+
+.opcion-estado:has(input:focus-visible) {
+    outline: 3px solid var(--dorado);
+    outline-offset: 2px;
+}
+
+.ficha-admin-botones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e2);
+}
+
+.ficha-admin-botones .acceso-boton {
+    width: auto;
+    margin-top: 0;
+    padding: 0 var(--e4);
+}
+
+.ficha-admin-botones .boton-linea {
+    height: 52px;
+}
+
+/* vista previa: se queda a la vista mientras se baja por el formulario */
+.ficha-admin-previa {
+    position: sticky;
+    top: var(--e3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--e2);
+}
+
+.ficha-admin-previa .sobretitulo {
+    margin: 0;
+}
+
+/* ---------- fotos ---------- */
+.ficha-admin-fotos {
+    margin-top: clamp(56px, 6vw, 88px);
+    padding-top: var(--e4);
+    border-top: 1px solid var(--linea);
+}
+
+.ficha-admin-fotos-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--e2);
+}
+
+.ficha-admin-fotos-cabecera h2 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    text-transform: uppercase;
+}
+
+.ficha-admin-fotos-cabecera p {
+    margin: 0;
+    color: var(--gris-claro);
+}
+
+.fotos-admin {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--e3);
+    margin: var(--e3) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.fotos-admin img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.fotos-admin li > span {
+    display: block;
+    margin-top: var(--e1);
+    color: var(--gris-claro);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* la casilla para subir: un recuadro punteado que se puede tocar */
+.fotos-admin-subir {
+    position: relative;
+}
+
+.fotos-admin-subir form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+}
+
+.zona-foto {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    aspect-ratio: 16 / 10;
+    padding: var(--e2);
+    border: 1px dashed var(--borde-campo);
+    border-radius: 4px;
+    color: var(--hueso);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 160ms var(--curva), background-color 160ms var(--curva);
+}
+
+.zona-foto:hover,
+.con-archivo .zona-foto {
+    border-color: var(--dorado);
+    border-style: solid;
+    background: rgba(186, 154, 107, 0.06);
+}
+
+.zona-foto-mas {
+    color: var(--dorado-claro);
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.zona-foto-texto {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.zona-foto-ayuda {
+    color: var(--gris-claro);
+    font-size: 0.75rem;
+}
+
+/* el campo de archivo real queda invisible (pero se puede usar con el teclado) */
+.fotos-admin-subir input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.fotos-admin-subir:has(input[type="file"]:focus-visible) .zona-foto {
+    outline: 3px solid var(--dorado);
+    outline-offset: 2px;
+}
+
+.fotos-admin-subir .boton-linea {
+    justify-content: center;
+    width: 100%;
+}
+
+@media (max-width: 1000px) {
+    /* la vista previa baja debajo del formulario */
+    .ficha-admin-cuerpo {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ficha-admin-previa {
+        position: static;
+        max-width: 420px;
+    }
+}
+
+@media (max-width: 700px) {
+    .ficha-admin-seccion {
+        padding: var(--e3);
+    }
+
+    .opciones-estado {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ficha-admin-botones .acceso-boton {
+        width: 100%;
+    }
+
+    .ficha-admin-botones .boton-linea {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .fotos-admin {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--e2);
+    }
+}
+
+/* =====================================================================
+   MI PERFIL (perfil.php): usa el mismo diseño de iniciar sesión
+   ===================================================================== */
+/* accesos rápidos debajo del saludo */
+.perfil-atajos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e1) var(--e3);
+    margin: var(--e4) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.perfil-atajos a {
+    display: inline-block;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.perfil-atajos a:hover {
+    border-bottom-color: var(--dorado-claro);
+    color: var(--dorado-claro);
+    text-decoration: none;
+}
+
+/* el correo no se edita: se ve como un campo apagado */
+.campo-etiqueta {
+    margin: 0 0 var(--e1);
+    color: var(--gris-claro);
+    font-size: 0.875rem;
+}
+
+.campo-fijo {
+    display: block;
+    height: 44px;
+    line-height: 42px;
+    margin: 0;
+    padding: 0 12px;
+    overflow: hidden;
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    color: var(--gris-claro);
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* la tarjeta del perfil es alta: un poco más de aire debajo del menú */
+.perfil {
+    padding-top: 250px;
+}
+
+/* en el celular, con la sesión iniciada, la cuenta suma una fila arriba del logo */
+@media (max-width: 700px) {
+    .pagina-acceso:has(.cuenta) .acceso {
+        padding-top: 310px;
+    }
+
+    .pagina-acceso:has(.cuenta):has(> .mensaje) .acceso {
+        padding-top: 390px;
+    }
+}
+
+/* cambiar contraseña: separado con una línea */
+.perfil-clave {
+    min-width: 0;
+    margin: 4px 0 0;
+    padding: var(--e3) 0 0;
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.perfil-clave > legend {
+    margin-bottom: 4px;
+    color: var(--hueso);
+    font-weight: 600;
+}
+
+.perfil-clave > legend span {
+    color: var(--gris-claro);
+    font-weight: 400;
+}
+
+.perfil-clave > .campo-ayuda {
+    clear: both;
+    margin: 0;
+}
+
+.perfil-clave > .campo {
+    margin-top: 20px;
+}
