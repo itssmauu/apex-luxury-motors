@@ -299,4 +299,7 @@ return [
     "modelo3d.credito"                => "3D model %s by %s, %s license.",
     "modelo3d.ver_original"           => "see original",
     "video.credito"                   => "Video %s by %s, %s license.",
+    "sobre.video_aria"                => "Video of a Lamborghini Aventador on the street",
+    "sobre.video_sobretitulo"         => "Apex in motion",
+    "sobre.video_titulo"              => "Power you can feel",
 ];
