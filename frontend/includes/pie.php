@@ -70,5 +70,7 @@ try {
         <p>Este sitio usa solo una cookie de sesión necesaria para iniciar sesión.</p>
     </div>
 </footer>
+<!-- aparición suave al hacer scroll (elementos con la clase "revelar") -->
+<script src="/apex/frontend/js/revelar.js?v=1"></script>
 </body>
 </html>
