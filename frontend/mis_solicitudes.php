@@ -4,6 +4,9 @@
 // trae requerirRol() y abre la sesión
 require_once __DIR__ . "/../backend/funciones/acceso.php";
 require_once __DIR__ . "/../backend/funciones/solicitudes.php";
+// textos traducidos (t) y nombres de los estados en el idioma elegido
+require_once __DIR__ . "/includes/idioma.php";
+require_once __DIR__ . "/datos/valores.php";
 
 // solo clientes: sin sesión va al login, y otro rol recibe "Acceso denegado"
 requerirRol("cliente");
@@ -11,30 +14,30 @@ requerirRol("cliente");
 // solo trae las solicitudes del cliente que inició sesión
 $solicitudes = listarMisSolicitudes();
 
-$titulo = "Mis solicitudes";
+$titulo = t("menu.mis_solicitudes");
 
 require_once __DIR__ . "/includes/encabezado.php";
 require_once __DIR__ . "/includes/menu.php";
 ?>
 
 <main>
-    <h1>Mis solicitudes</h1>
+    <h1><?php echo htmlspecialchars(t("menu.mis_solicitudes")); ?></h1>
 
     <?php if (count($solicitudes) === 0): ?>
-        <p>Todavía no has enviado ninguna solicitud.</p>
-        <p><a href="catalogo.php">Ver el catálogo</a></p>
+        <p><?php echo htmlspecialchars(t("solicitudes.vacio")); ?></p>
+        <p><a href="catalogo.php"><?php echo htmlspecialchars(t("comun.ver_catalogo")); ?></a></p>
     <?php else: ?>
         <!-- en el celular la tabla se desliza de lado dentro de este recuadro (tabindex para moverla con el teclado) -->
         <div class="tabla-desplazable" role="region" aria-labelledby="titulo-tabla" tabindex="0">
         <table>
-            <caption id="titulo-tabla">Solicitudes enviadas</caption>
+            <caption id="titulo-tabla"><?php echo htmlspecialchars(t("solicitudes.caption")); ?></caption>
             <thead>
                 <tr>
-                    <th scope="col">Fecha</th>
-                    <th scope="col">Vehículo</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Comentario</th>
-                    <th scope="col">Acción</th>
+                    <th scope="col"><?php echo htmlspecialchars(t("dato.fecha")); ?></th>
+                    <th scope="col"><?php echo htmlspecialchars(t("dato.vehiculo")); ?></th>
+                    <th scope="col"><?php echo htmlspecialchars(t("dato.estado")); ?></th>
+                    <th scope="col"><?php echo htmlspecialchars(t("dato.comentario")); ?></th>
+                    <th scope="col"><?php echo htmlspecialchars(t("dato.accion")); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -47,8 +50,8 @@ require_once __DIR__ . "/includes/menu.php";
                                 <?php echo htmlspecialchars($nombreVehiculo); ?>
                             </a>
                         </td>
-                        <!-- la clase solo cambia el color; el estado siempre va escrito -->
-                        <td class="estado-<?php echo htmlspecialchars($s["estado"]); ?>"><?php echo htmlspecialchars(ucfirst($s["estado"])); ?></td>
+                        <!-- la clase solo cambia el color; el estado siempre va escrito (traducido; si no se conoce, tal cual) -->
+                        <td class="estado-<?php echo htmlspecialchars($s["estado"]); ?>"><?php echo htmlspecialchars(nombreEstadoSolicitud($s["estado"])); ?></td>
                         <td>
                             <?php if ($s["comentario"] !== null && $s["comentario"] !== ""): ?>
                                 <?php echo htmlspecialchars($s["comentario"]); ?>
@@ -62,8 +65,8 @@ require_once __DIR__ . "/includes/menu.php";
                                 <form method="post" action="/apex/backend/procesos/cancelar_solicitud.php">
                                     <input type="hidden" name="solicitud_id" value="<?php echo (int) $s["id"]; ?>">
                                     <button type="submit"
-                                            aria-label="Cancelar la solicitud de <?php echo htmlspecialchars($nombreVehiculo); ?>">
-                                        Cancelar
+                                            aria-label="<?php echo htmlspecialchars(t("solicitudes.cancelar_aria", $nombreVehiculo)); ?>">
+                                        <?php echo htmlspecialchars(t("solicitudes.cancelar")); ?>
                                     </button>
                                 </form>
                             <?php else: ?>
@@ -75,7 +78,7 @@ require_once __DIR__ . "/includes/menu.php";
             </tbody>
         </table>
         </div>
-        <p><a href="catalogo.php">Ver el catálogo</a></p>
+        <p><a href="catalogo.php"><?php echo htmlspecialchars(t("comun.ver_catalogo")); ?></a></p>
     <?php endif; ?>
 </main>
 

@@ -11,6 +11,11 @@ require_once __DIR__ . "/../backend/funciones/vehiculos.php";
 require_once __DIR__ . "/../backend/funciones/acceso.php";
 // especificaciones técnicas: están en un archivo aparte porque la base no las guarda
 require_once __DIR__ . "/datos/especificaciones.php";
+// textos traducidos: interfaz (t), categorías, descripciones y ficha técnica
+require_once __DIR__ . "/includes/idioma.php";
+require_once __DIR__ . "/datos/valores.php";
+require_once __DIR__ . "/datos/descripciones.php";
+require_once __DIR__ . "/datos/especificaciones_traducciones.php";
 
 // el id viene en la dirección: vehiculo.php?id=8
 $id = isset($_GET["id"]) && is_string($_GET["id"]) ? $_GET["id"] : 0;
@@ -23,7 +28,7 @@ $rol = rolActual();
 
 if ($vehiculo === null) {
     http_response_code(404);
-    $titulo = "Vehículo no encontrado";
+    $titulo = t("vehiculo.no_encontrado");
 } else {
     $titulo = $vehiculo["marca"] . " " . $vehiculo["modelo"];
     // el logo y el menú van encima de la foto grande (igual que en la portada)
@@ -33,13 +38,14 @@ if ($vehiculo === null) {
 // ---------- fotos ----------
 // El nombre del archivo dice qué vista es: "ferrari-458-trasera.jpg" es la trasera.
 // Las fotos que sube el administrador no siguen esa regla: salen como "Vista 2", "Vista 3"...
+// (el nombre de cada vista sale del diccionario: vista.frontal, vista.lateral...)
 $nombresVista = [
-    "frontal"  => "Frontal",
-    "lateral"  => "Perfil",
-    "trasera"  => "Trasera",
-    "puertas"  => "Puertas abiertas",
-    "interior" => "Interior",
-    "cabina"   => "Cabina",
+    "frontal"  => "vista.frontal",
+    "lateral"  => "vista.lateral",
+    "trasera"  => "vista.trasera",
+    "puertas"  => "vista.puertas",
+    "interior" => "vista.interior",
+    "cabina"   => "vista.cabina",
 ];
 
 $fotos = [];
@@ -50,12 +56,12 @@ if ($vehiculo !== null) {
         $clave = strtolower(end($partes));
 
         if (isset($nombresVista[$clave])) {
-            $vista = $nombresVista[$clave];
+            $vista = t($nombresVista[$clave]);
         } elseif ($numero === 0) {
-            $vista = "Frontal";       // la primera foto de cada auto es la de frente
+            $vista = t("vista.frontal");       // la primera foto de cada auto es la de frente
             $clave = "frontal";
         } else {
-            $vista = "Vista " . ($numero + 1);
+            $vista = t("vista.numero", $numero + 1);
         }
 
         // medidas reales, para ponerle width y height y que la página no salte al cargar
@@ -124,32 +130,44 @@ function cifraCorta($texto, $patrones)
     return "";
 }
 
+// la cifra corta se saca del texto en español; aquí solo se traduce el "Más de" / "Menos de" del inicio
+function cifraTraducida($cifra)
+{
+    if (strpos($cifra, "Más de ") === 0) {
+        return t("cifra.mas_de", substr($cifra, strlen("Más de ")));
+    }
+    if (strpos($cifra, "Menos de ") === 0) {
+        return t("cifra.menos_de", substr($cifra, strlen("Menos de ")));
+    }
+    return $cifra;
+}
+
 // las cifras grandes de la escena "Rendimiento" (solo las que tienen dato)
 $cifras = [];
 $potencia = cifraCorta(datoFicha($fichaTecnica, "Potencia"), ["(?:PS|CV|bhp|hp)\b", "kW\b"]);
 if ($potencia !== "") {
-    $cifras[] = ["valor" => $potencia, "nombre" => "Potencia máxima"];
+    $cifras[] = ["valor" => cifraTraducida($potencia), "nombre" => t("cifra.potencia")];
 }
 $aceleracionTexto = datoFicha($fichaTecnica, "Aceleración");
 $aceleracion = cifraCorta($aceleracionTexto, ["s\b"]);
 if ($aceleracion !== "") {
     // la fuente da la cifra de 0 a 60 mph o de 0 a 100 km/h: se dice cuál es
     $tramo = (strpos($aceleracionTexto, "0–60") !== false) ? "0–60 mph" : "0–100 km/h";
-    $cifras[] = ["valor" => $aceleracion, "nombre" => "Aceleración " . $tramo];
+    $cifras[] = ["valor" => cifraTraducida($aceleracion), "nombre" => t("cifra.aceleracion", $tramo)];
 }
 $velocidad = cifraCorta(datoFicha($fichaTecnica, "Velocidad máxima"), ["km\/h"]);
 if ($velocidad !== "") {
-    $cifras[] = ["valor" => $velocidad, "nombre" => "Velocidad máxima"];
+    $cifras[] = ["valor" => cifraTraducida($velocidad), "nombre" => t("cifra.velocidad")];
 }
 $torque = cifraCorta(datoFicha($fichaTecnica, "Torque"), ["N·m"]);
 if ($torque !== "") {
-    $cifras[] = ["valor" => $torque, "nombre" => "Torque máximo"];
+    $cifras[] = ["valor" => cifraTraducida($torque), "nombre" => t("cifra.torque")];
 }
 
-// qué filas van en cada tabla de especificaciones
+// qué filas van en cada tabla de especificaciones (la clave es el título de la tabla en el diccionario)
 $tablasTecnicas = [
-    "Motor y rendimiento" => ["Motor", "Cilindrada", "Potencia", "Torque", "Aceleración", "Velocidad máxima"],
-    "Tracción y peso" => ["Tracción", "Peso"],
+    "ficha.tabla_motor" => ["Motor", "Cilindrada", "Potencia", "Torque", "Aceleración", "Velocidad máxima"],
+    "ficha.tabla_traccion" => ["Tracción", "Peso"],
 ];
 
 // ---------- escenas (foto fija + información encima) ----------
@@ -158,10 +176,12 @@ $escenaDiseno = buscarFoto($fotos, ["lateral", "trasera", "puertas", "frontal"])
 $escenaRendimiento = buscarFoto($fotos, ["trasera", "puertas", "lateral", "frontal"]);
 $escenaInterior = buscarFoto($fotos, ["interior", "cabina", "puertas"]);
 
-$motor = datoFicha($fichaTecnica, "Motor");
-$cilindrada = datoFicha($fichaTecnica, "Cilindrada");
-$traccion = datoFicha($fichaTecnica, "Tracción");
-$peso = datoFicha($fichaTecnica, "Peso");
+// los datos se leen en español y se muestran traducidos
+$idVehiculo = ($vehiculo !== null) ? (int) $vehiculo["id"] : 0;
+$motor = datoFichaTraducido($idVehiculo, "Motor", datoFicha($fichaTecnica, "Motor"));
+$cilindrada = datoFichaTraducido($idVehiculo, "Cilindrada", datoFicha($fichaTecnica, "Cilindrada"));
+$traccion = datoFichaTraducido($idVehiculo, "Tracción", datoFicha($fichaTecnica, "Tracción"));
+$peso = datoFichaTraducido($idVehiculo, "Peso", datoFicha($fichaTecnica, "Peso"));
 
 // ---------- videos (opcionales) ----------
 // si existen img/vehiculos/videos/8-1.mp4 y 8-2.mp4, se muestran; si no, no pasa nada
@@ -190,9 +210,9 @@ require_once __DIR__ . "/includes/menu.php";
 
 <?php if ($vehiculo === null): ?>
 <main>
-    <h1>Vehículo no encontrado</h1>
-    <p>El vehículo que buscas no existe o ya no está en el catálogo.</p>
-    <p><a href="catalogo.php">Volver al catálogo</a></p>
+    <h1><?php echo htmlspecialchars(t("vehiculo.no_encontrado")); ?></h1>
+    <p><?php echo htmlspecialchars(t("vehiculo.no_existe")); ?></p>
+    <p><a href="catalogo.php"><?php echo htmlspecialchars(t("vehiculo.volver_catalogo")); ?></a></p>
 </main>
 <?php else: ?>
 <main>
@@ -202,14 +222,14 @@ require_once __DIR__ . "/includes/menu.php";
             <!-- fetchpriority high: es lo primero que se ve, que cargue antes que lo demás -->
             <img class="modelo-portada-foto"
                  src="<?php echo htmlspecialchars($fotoPortada["ruta"]); ?>"
-                 alt="<?php echo htmlspecialchars($nombreAuto . ", vista " . mb_strtolower($fotoPortada["vista"])); ?>"
+                 alt="<?php echo htmlspecialchars(t("vehiculo.alt_vista", $nombreAuto, mb_strtolower($fotoPortada["vista"]))); ?>"
                  <?php if ($fotoPortada["ancho"] > 0) { echo 'width="' . $fotoPortada["ancho"] . '" height="' . $fotoPortada["alto"] . '"'; } ?>
                  fetchpriority="high">
         <?php endif; ?>
 
         <div class="modelo-portada-texto">
-            <a class="modelo-volver" href="catalogo.php"><span aria-hidden="true">←</span> Catálogo</a>
-            <p class="sobretitulo"><?php echo htmlspecialchars($vehiculo["categoria"]); ?></p>
+            <a class="modelo-volver" href="catalogo.php"><span aria-hidden="true">←</span> <?php echo htmlspecialchars(t("menu.catalogo")); ?></a>
+            <p class="sobretitulo"><?php echo htmlspecialchars(nombreCategoria($vehiculo["categoria"])); ?></p>
             <h1 id="nombre-auto" class="modelo-nombre">
                 <span class="modelo-marca"><?php echo htmlspecialchars($vehiculo["marca"]); ?></span>
                 <?php echo htmlspecialchars($vehiculo["modelo"]); ?>
@@ -217,9 +237,9 @@ require_once __DIR__ . "/includes/menu.php";
             <p class="modelo-precio">
                 <?php echo $precioTexto; ?> <span>USD</span>
                 <?php if ($vendido): ?>
-                    <span class="sello sello-vendido">Vendido</span>
+                    <span class="sello sello-vendido"><?php echo htmlspecialchars(t("estado_vehiculo.vendido")); ?></span>
                 <?php else: ?>
-                    <span class="sello">Disponible</span>
+                    <span class="sello"><?php echo htmlspecialchars(t("estado_vehiculo.disponible")); ?></span>
                 <?php endif; ?>
             </p>
         </div>
@@ -229,22 +249,22 @@ require_once __DIR__ . "/includes/menu.php";
     </section>
 
     <!-- ===== barra del modelo: se queda pegada arriba al hacer scroll ===== -->
-    <nav class="modelo-barra" aria-label="Secciones del vehículo">
+    <nav class="modelo-barra" aria-label="<?php echo htmlspecialchars(t("vehiculo.secciones")); ?>">
         <p class="modelo-barra-nombre" aria-hidden="true"><?php echo htmlspecialchars($nombreAuto); ?></p>
         <ul>
-            <li><a href="#diseno">Diseño</a></li>
+            <li><a href="#diseno"><?php echo htmlspecialchars(t("vehiculo.diseno")); ?></a></li>
             <?php if (count($cifras) > 0): ?>
-                <li><a href="#rendimiento">Rendimiento</a></li>
+                <li><a href="#rendimiento"><?php echo htmlspecialchars(t("vehiculo.rendimiento")); ?></a></li>
             <?php endif; ?>
             <?php if (count($fotos) > 1): ?>
-                <li><a href="#vistas">Vistas</a></li>
+                <li><a href="#vistas"><?php echo htmlspecialchars(t("vehiculo.vistas")); ?></a></li>
             <?php endif; ?>
             <?php if (count($fichaTecnica) > 0): ?>
-                <li><a href="#especificaciones">Especificaciones</a></li>
+                <li><a href="#especificaciones"><?php echo htmlspecialchars(t("vehiculo.especificaciones")); ?></a></li>
             <?php endif; ?>
         </ul>
         <?php if ($rol !== "administrador" && !$vendido): ?>
-            <a class="modelo-barra-boton" href="#solicitar">Solicitar compra</a>
+            <a class="modelo-barra-boton" href="#solicitar"><?php echo htmlspecialchars(t("vehiculo.solicitar_compra")); ?></a>
         <?php endif; ?>
     </nav>
 
@@ -256,23 +276,26 @@ require_once __DIR__ . "/includes/menu.php";
         <?php endif; ?>
         <div class="escena-contenido">
             <div class="escena-panel revelar">
-                <p class="sobretitulo">Diseño</p>
+                <p class="sobretitulo"><?php echo htmlspecialchars(t("vehiculo.diseno")); ?></p>
                 <h2 id="titulo-diseno" class="escena-titulo"><?php echo htmlspecialchars($vehiculo["modelo"]); ?></h2>
-                <p><?php echo htmlspecialchars($vehiculo["descripcion"]); ?></p>
+                <p><?php echo htmlspecialchars(descripcionVehiculo($vehiculo["id"], $vehiculo["descripcion"])); ?></p>
             </div>
             <?php if (count($fotos) > 1): ?>
                 <div class="escena-panel escena-panel-derecha revelar">
-                    <p class="sobretitulo">Desde todos los ángulos</p>
+                    <p class="sobretitulo"><?php echo htmlspecialchars(t("vehiculo.angulos")); ?></p>
                     <?php
                     // "frontal, perfil, trasera e interior": las vistas que tiene este auto
                     $listaVistas = array_map("mb_strtolower", array_column($fotos, "vista"));
                     $ultimaVista = array_pop($listaVistas);
-                    // "trasera e interior", no "trasera y interior"
-                    $conector = (mb_substr($ultimaVista, 0, 1) === "i") ? " e " : " y ";
+                    $conector = t("lista.y");
+                    // en español: "trasera e interior", no "trasera y interior"
+                    if (idiomaActual() === "es" && mb_substr($ultimaVista, 0, 1) === "i") {
+                        $conector = "e";
+                    }
+                    $textoVistas = implode(", ", $listaVistas) . " " . $conector . " " . $ultimaVista;
                     ?>
-                    <p><?php echo count($fotos); ?> vistas del <?php echo htmlspecialchars($nombreAuto); ?>:
-                       <?php echo htmlspecialchars(implode(", ", $listaVistas) . $conector . $ultimaVista); ?>.</p>
-                    <a class="enlace-flecha" href="#vistas">Ver todas las vistas <span aria-hidden="true">→</span></a>
+                    <p><?php echo htmlspecialchars(t("vehiculo.vistas_resumen", count($fotos), $nombreAuto, $textoVistas)); ?></p>
+                    <a class="enlace-flecha" href="#vistas"><?php echo htmlspecialchars(t("vehiculo.ver_vistas")); ?> <span aria-hidden="true">→</span></a>
                 </div>
             <?php endif; ?>
         </div>
@@ -280,12 +303,16 @@ require_once __DIR__ . "/includes/menu.php";
 
     <?php if (isset($videos[1])): ?>
         <!-- video 1 (solo si el archivo existe) -->
-        <section class="modelo-video" aria-label="Video del <?php echo htmlspecialchars($nombreAuto); ?>">
+        <section class="modelo-video" aria-label="<?php echo htmlspecialchars(t("vehiculo.video_aria", $nombreAuto)); ?>">
             <video class="modelo-video-archivo" muted loop playsinline preload="none"
                    <?php if ($videos[1]["poster"] !== "") { echo 'poster="' . htmlspecialchars($videos[1]["poster"]) . '"'; } ?>>
                 <source src="<?php echo htmlspecialchars($videos[1]["video"]); ?>" type="video/mp4">
             </video>
-            <button type="button" class="boton-pausa video-pausa" aria-label="Pausar video" hidden>
+            <!-- data-texto-*: los textos traducidos que usa vehiculo.js -->
+            <button type="button" class="boton-pausa video-pausa"
+                    aria-label="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
+                    data-texto-pausar="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
+                    data-texto-reproducir="<?php echo htmlspecialchars(t("vehiculo.reproducir_video")); ?>" hidden>
                 <span class="icono-pausa" aria-hidden="true"></span>
             </button>
         </section>
@@ -299,8 +326,8 @@ require_once __DIR__ . "/includes/menu.php";
             <?php endif; ?>
             <div class="escena-contenido">
                 <div class="escena-panel escena-panel-ancho revelar">
-                    <p class="sobretitulo">Rendimiento</p>
-                    <h2 id="titulo-rendimiento" class="escena-titulo">En cifras</h2>
+                    <p class="sobretitulo"><?php echo htmlspecialchars(t("vehiculo.rendimiento")); ?></p>
+                    <h2 id="titulo-rendimiento" class="escena-titulo"><?php echo htmlspecialchars(t("vehiculo.en_cifras")); ?></h2>
                     <!-- número grande arriba y su nombre abajo -->
                     <dl class="modelo-cifras">
                         <?php foreach ($cifras as $numero => $cifra): ?>
@@ -313,10 +340,10 @@ require_once __DIR__ . "/includes/menu.php";
                 </div>
                 <?php if ($motor !== ""): ?>
                     <div class="escena-panel revelar">
-                        <p class="sobretitulo">Motor</p>
+                        <p class="sobretitulo"><?php echo htmlspecialchars(t("ficha.motor")); ?></p>
                         <p class="escena-dato"><?php echo htmlspecialchars($motor); ?></p>
                         <?php if ($cilindrada !== ""): ?>
-                            <p><?php echo htmlspecialchars($cilindrada); ?> de cilindrada.</p>
+                            <p><?php echo htmlspecialchars(t("vehiculo.cilindrada", $cilindrada)); ?></p>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
@@ -326,12 +353,15 @@ require_once __DIR__ . "/includes/menu.php";
 
     <?php if (isset($videos[2])): ?>
         <!-- video 2 (solo si el archivo existe) -->
-        <section class="modelo-video" aria-label="Segundo video del <?php echo htmlspecialchars($nombreAuto); ?>">
+        <section class="modelo-video" aria-label="<?php echo htmlspecialchars(t("vehiculo.video2_aria", $nombreAuto)); ?>">
             <video class="modelo-video-archivo" muted loop playsinline preload="none"
                    <?php if ($videos[2]["poster"] !== "") { echo 'poster="' . htmlspecialchars($videos[2]["poster"]) . '"'; } ?>>
                 <source src="<?php echo htmlspecialchars($videos[2]["video"]); ?>" type="video/mp4">
             </video>
-            <button type="button" class="boton-pausa video-pausa" aria-label="Pausar video" hidden>
+            <button type="button" class="boton-pausa video-pausa"
+                    aria-label="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
+                    data-texto-pausar="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
+                    data-texto-reproducir="<?php echo htmlspecialchars(t("vehiculo.reproducir_video")); ?>" hidden>
                 <span class="icono-pausa" aria-hidden="true"></span>
             </button>
         </section>
@@ -343,14 +373,14 @@ require_once __DIR__ . "/includes/menu.php";
             <div class="escena-fondo"><img src="<?php echo htmlspecialchars($escenaInterior["ruta"]); ?>" alt="" loading="lazy"></div>
             <div class="escena-contenido">
                 <div class="escena-panel escena-panel-derecha revelar">
-                    <p class="sobretitulo">Al volante</p>
+                    <p class="sobretitulo"><?php echo htmlspecialchars(t("vehiculo.al_volante")); ?></p>
                     <h2 id="titulo-interior" class="escena-titulo"><?php echo htmlspecialchars($escenaInterior["vista"]); ?></h2>
                     <dl class="escena-lista">
                         <?php if ($traccion !== ""): ?>
-                            <div><dt>Tracción</dt><dd><?php echo htmlspecialchars($traccion); ?></dd></div>
+                            <div><dt><?php echo htmlspecialchars(t("ficha.traccion")); ?></dt><dd><?php echo htmlspecialchars($traccion); ?></dd></div>
                         <?php endif; ?>
                         <?php if ($peso !== ""): ?>
-                            <div><dt>Peso</dt><dd><?php echo htmlspecialchars($peso); ?></dd></div>
+                            <div><dt><?php echo htmlspecialchars(t("ficha.peso")); ?></dt><dd><?php echo htmlspecialchars($peso); ?></dd></div>
                         <?php endif; ?>
                     </dl>
                 </div>
@@ -365,8 +395,8 @@ require_once __DIR__ . "/includes/menu.php";
             <div class="contenedor">
                 <div class="seccion-cabecera revelar">
                     <div>
-                        <p class="sobretitulo">Galería</p>
-                        <h2 id="titulo-vistas" class="titulo-grande">Todas las vistas</h2>
+                        <p class="sobretitulo"><?php echo htmlspecialchars(t("vehiculo.galeria")); ?></p>
+                        <h2 id="titulo-vistas" class="titulo-grande"><?php echo htmlspecialchars(t("vehiculo.todas_vistas")); ?></h2>
                     </div>
                     <!-- el lector de pantalla avisa qué vista se está mostrando -->
                     <p class="visor-estado" aria-live="polite">
@@ -377,23 +407,24 @@ require_once __DIR__ . "/includes/menu.php";
 
                 <figure class="visor revelar">
                     <img id="visor-foto" src="<?php echo htmlspecialchars($fotos[0]["ruta"]); ?>"
-                         alt="<?php echo htmlspecialchars($nombreAuto . ", vista " . mb_strtolower($fotos[0]["vista"])); ?>"
+                         alt="<?php echo htmlspecialchars(t("vehiculo.alt_vista", $nombreAuto, mb_strtolower($fotos[0]["vista"]))); ?>"
                          <?php if ($fotos[0]["ancho"] > 0) { echo 'width="' . $fotos[0]["ancho"] . '" height="' . $fotos[0]["alto"] . '"'; } ?>
                          loading="lazy">
                     <!-- flechas: el JavaScript les quita el hidden -->
-                    <button type="button" class="visor-flecha visor-anterior" aria-label="Vista anterior" hidden>
+                    <button type="button" class="visor-flecha visor-anterior" aria-label="<?php echo htmlspecialchars(t("vehiculo.vista_anterior")); ?>" hidden>
                         <span aria-hidden="true">‹</span>
                     </button>
-                    <button type="button" class="visor-flecha visor-siguiente" aria-label="Vista siguiente" hidden>
+                    <button type="button" class="visor-flecha visor-siguiente" aria-label="<?php echo htmlspecialchars(t("vehiculo.vista_siguiente")); ?>" hidden>
                         <span aria-hidden="true">›</span>
                     </button>
                 </figure>
 
-                <ul class="visor-miniaturas" aria-label="Elegir vista">
+                <!-- data-alt y data-vista ya van traducidos: vehiculo.js solo los copia -->
+                <ul class="visor-miniaturas" aria-label="<?php echo htmlspecialchars(t("vehiculo.elegir_vista")); ?>">
                     <?php foreach ($fotos as $numero => $foto): ?>
                         <li>
                             <a class="visor-miniatura" href="<?php echo htmlspecialchars($foto["ruta"]); ?>"
-                               data-alt="<?php echo htmlspecialchars($nombreAuto . ", vista " . mb_strtolower($foto["vista"])); ?>"
+                               data-alt="<?php echo htmlspecialchars(t("vehiculo.alt_vista", $nombreAuto, mb_strtolower($foto["vista"]))); ?>"
                                data-vista="<?php echo htmlspecialchars($foto["vista"]); ?>"
                                <?php if ($numero === 0) { echo 'aria-current="true"'; } ?>>
                                 <img src="<?php echo htmlspecialchars($foto["ruta"]); ?>" alt="" width="160" height="100" loading="lazy">
@@ -410,11 +441,11 @@ require_once __DIR__ . "/includes/menu.php";
         <!-- ===== 6. especificaciones técnicas ===== -->
         <section class="seccion ficha-tecnica" id="especificaciones" aria-labelledby="titulo-especificaciones">
             <div class="contenedor">
-                <p class="sobretitulo revelar">Ficha técnica</p>
-                <h2 id="titulo-especificaciones" class="titulo-grande revelar">Especificaciones técnicas</h2>
+                <p class="sobretitulo revelar"><?php echo htmlspecialchars(t("vehiculo.ficha_tecnica")); ?></p>
+                <h2 id="titulo-especificaciones" class="titulo-grande revelar"><?php echo htmlspecialchars(t("vehiculo.especificaciones_tecnicas")); ?></h2>
 
                 <div class="ficha-tablas">
-                    <?php foreach ($tablasTecnicas as $nombreTabla => $filas): ?>
+                    <?php foreach ($tablasTecnicas as $claveTabla => $filas): ?>
                         <?php
                         // solo las filas que tienen dato, para no mostrar tablas vacías
                         $filasConDato = [];
@@ -426,12 +457,12 @@ require_once __DIR__ . "/includes/menu.php";
                         ?>
                         <?php if (count($filasConDato) > 0): ?>
                             <table class="revelar">
-                                <caption><?php echo htmlspecialchars($nombreTabla); ?></caption>
+                                <caption><?php echo htmlspecialchars(t($claveTabla)); ?></caption>
                                 <tbody>
                                     <?php foreach ($filasConDato as $dato => $valor): ?>
                                         <tr>
-                                            <th scope="row"><?php echo htmlspecialchars($dato); ?></th>
-                                            <td><?php echo htmlspecialchars($valor); ?></td>
+                                            <th scope="row"><?php echo htmlspecialchars(nombreDatoFicha($dato)); ?></th>
+                                            <td><?php echo htmlspecialchars(datoFichaTraducido($idVehiculo, $dato, $valor)); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -440,7 +471,7 @@ require_once __DIR__ . "/includes/menu.php";
                     <?php endforeach; ?>
                 </div>
 
-                <p class="nota">Cifras de referencia obtenidas de fuentes públicas; pueden variar según el mercado y el año del modelo.</p>
+                <p class="nota"><?php echo htmlspecialchars(t("ficha.nota")); ?></p>
             </div>
         </section>
     <?php endif; ?>
@@ -451,19 +482,19 @@ require_once __DIR__ . "/includes/menu.php";
             <div class="revelar">
                 <p class="sobretitulo">Apex Luxury Motors</p>
                 <h2 id="titulo-solicitar" class="titulo-grande">
-                    <?php echo $vendido ? "Este auto ya tiene dueño" : "Hazlo tuyo"; ?>
+                    <?php echo htmlspecialchars($vendido ? t("vehiculo.vendido_titulo") : t("vehiculo.hazlo_tuyo")); ?>
                 </h2>
                 <p class="solicitar-precio"><?php echo $precioTexto; ?> <span>USD</span></p>
             </div>
 
             <div class="solicitar-ficha revelar" style="--i: 1">
                 <dl class="escena-lista">
-                    <div><dt>Marca</dt><dd><?php echo htmlspecialchars($vehiculo["marca"]); ?></dd></div>
-                    <div><dt>Modelo</dt><dd><?php echo htmlspecialchars($vehiculo["modelo"]); ?></dd></div>
-                    <div><dt>Categoría</dt><dd><?php echo htmlspecialchars($vehiculo["categoria"]); ?></dd></div>
+                    <div><dt><?php echo htmlspecialchars(t("dato.marca")); ?></dt><dd><?php echo htmlspecialchars($vehiculo["marca"]); ?></dd></div>
+                    <div><dt><?php echo htmlspecialchars(t("dato.modelo")); ?></dt><dd><?php echo htmlspecialchars($vehiculo["modelo"]); ?></dd></div>
+                    <div><dt><?php echo htmlspecialchars(t("dato.categoria")); ?></dt><dd><?php echo htmlspecialchars(nombreCategoria($vehiculo["categoria"])); ?></dd></div>
                     <div>
-                        <dt>Estado</dt>
-                        <dd><?php if ($vendido): ?><span class="vendido">Vendido</span><?php else: ?>Disponible<?php endif; ?></dd>
+                        <dt><?php echo htmlspecialchars(t("dato.estado")); ?></dt>
+                        <dd><?php if ($vendido): ?><span class="vendido"><?php echo htmlspecialchars(t("estado_vehiculo.vendido")); ?></span><?php else: ?><?php echo htmlspecialchars(t("estado_vehiculo.disponible")); ?><?php endif; ?></dd>
                     </div>
                 </dl>
 
@@ -471,12 +502,12 @@ require_once __DIR__ . "/includes/menu.php";
                 <?php if ($rol !== "administrador"): ?>
                     <div class="accion">
                         <?php if ($vendido): ?>
-                            <p class="vendido">Este vehículo ya fue vendido</p>
-                            <a href="catalogo.php">Ver otros vehículos</a>
+                            <p class="vendido"><?php echo htmlspecialchars(t("vehiculo.ya_vendido")); ?></p>
+                            <a href="catalogo.php"><?php echo htmlspecialchars(t("vehiculo.ver_otros")); ?></a>
                         <?php elseif ($rol === "cliente"): ?>
                             <form method="post" action="../backend/procesos/solicitar.php" id="form-solicitar">
                                 <input type="hidden" name="vehiculo_id" value="<?php echo (int) $vehiculo["id"]; ?>">
-                                <button type="submit">Solicitar compra</button>
+                                <button type="submit"><?php echo htmlspecialchars(t("vehiculo.solicitar_compra")); ?></button>
                             </form>
                             <script>
                                 // para que un doble clic no mande la solicitud dos veces
@@ -490,7 +521,7 @@ require_once __DIR__ . "/includes/menu.php";
                                 });
                             </script>
                         <?php else: ?>
-                            <a href="login.php">Iniciar sesión para solicitar</a>
+                            <a href="login.php"><?php echo htmlspecialchars(t("vehiculo.login_para_solicitar")); ?></a>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
@@ -500,7 +531,7 @@ require_once __DIR__ . "/includes/menu.php";
 </main>
 
 <!-- galería y videos de esta página -->
-<script src="/apex/frontend/js/vehiculo.js?v=1"></script>
+<script src="/apex/frontend/js/vehiculo.js?v=2"></script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . "/includes/pie.php"; ?>

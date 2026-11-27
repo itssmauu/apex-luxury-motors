@@ -21,7 +21,10 @@
 
         var dibujarBoton = function () {
             botonPausa.classList.toggle("en-pausa", enPausa);
-            botonPausa.setAttribute("aria-label", enPausa ? "Reproducir video de fondo" : "Pausar video de fondo");
+            // los textos traducidos vienen de PHP (data-texto-*); el español queda de respaldo
+            botonPausa.setAttribute("aria-label", enPausa
+                ? (botonPausa.dataset.textoReproducir || "Reproducir video de fondo")
+                : (botonPausa.dataset.textoPausar || "Pausar video de fondo"));
         };
 
         var reproducir = function (video) {
@@ -87,7 +90,9 @@
             var mostrar = campo.type === "password";
             campo.type = mostrar ? "text" : "password";
             // el texto del botón dice lo que va a hacer
-            boton.textContent = mostrar ? "Ocultar" : "Mostrar";
+            boton.textContent = mostrar
+                ? (boton.dataset.textoOcultar || "Ocultar")
+                : (boton.dataset.textoMostrar || "Mostrar");
             campo.focus();
         });
     });
