@@ -120,3 +120,18 @@ function actualizarPerfil($nombre, $telefono, $contrasenaActual, $contrasenaNuev
 
     return ["ok" => true, "mensaje" => "Perfil actualizado."];
 }
+
+function obtenerPerfil() {
+    global $conexion;
+
+    // solo se lee al usuario de la sesión
+    if (!isset($_SESSION["usuario_id"])) {
+        return null;
+    }
+
+    $consulta = $conexion->prepare("SELECT nombre, correo, telefono FROM usuarios WHERE id = ?");
+    $consulta->execute([$_SESSION["usuario_id"]]);
+    $usuario = $consulta->fetch();
+
+    return $usuario ? $usuario : null;
+}
