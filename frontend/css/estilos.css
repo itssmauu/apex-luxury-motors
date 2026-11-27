@@ -1,0 +1,662 @@
+/* Estilos de Apex Luxury Motors (demo)
+   Idea: "sala de noche": fondo oscuro para que las fotos de los autos resalten,
+   un solo acento dorado sacado del logo y una ficha técnica para los datos */
+
+/* colores y medidas que se repiten */
+:root {
+    color-scheme: dark;           /* listas de los selectores y barra de desplazamiento oscuras */
+
+    --fondo: #111418;             /* fondo de la página (grafito casi negro) */
+    --tarjeta: #1b1f25;           /* tarjetas, buscador y ficha */
+    --campo: #14171b;             /* fondo de los selectores y del campo de precio */
+    --hueso: #ede8de;             /* texto principal y botón Buscar */
+    --gris-claro: #a9adb4;        /* etiquetas y textos secundarios */
+    --linea: #2c3138;             /* líneas finas de la ficha */
+    --borde-campo: #727a85;       /* borde de los campos (se nota sobre la tarjeta) */
+    --dorado: #ba9a6b;            /* único acento: el dorado del logo */
+    --dorado-claro: #d8bd8a;      /* acento al pasar el mouse */
+    --rojo-vendido: #ff8b82;      /* solo para "Vendido" */
+    --rojo-fondo: #3b1e1e;
+    --curva: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+    /* espacios: todos salen de esta escala de 8 en 8 */
+    --e1: 8px;
+    --e2: 16px;
+    --e3: 24px;   /* dentro de tarjetas, filtros y ficha */
+    --e4: 32px;   /* entre bloques grandes */
+    --e6: 48px;   /* aire arriba de la página */
+}
+
+/* ---------- base ---------- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--hueso);
+    font-family: Bahnschrift, "Segoe UI", Arial, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+}
+
+/* el contenido usa casi todo el ancho (24 px a los lados);
+   solo en pantallas muy anchas se pone un máximo */
+main {
+    max-width: 2200px;
+    margin: 0 auto;
+    padding: var(--e6) var(--e3) var(--e6);
+}
+
+/* el detalle usa todo el ancho de la ventana, con un relleno pequeño a los lados */
+main:has(> .detalle) {
+    max-width: none;
+    padding-left: clamp(16px, 2vw, 32px);
+    padding-right: clamp(16px, 2vw, 32px);
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    line-height: 1.1;
+    text-wrap: balance;
+}
+
+h1 {
+    font-size: 3rem;              /* 48 px */
+    font-weight: 700;
+    font-stretch: 75%;            /* Bahnschrift angosta */
+    letter-spacing: -0.01em;
+    margin-bottom: var(--e4);
+}
+
+/* el nombre del auto en el detalle es lo más llamativo */
+h1:has(+ .detalle) {
+    font-size: 3.5rem;            /* 56 px */
+}
+
+a {
+    color: var(--dorado);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: color 160ms var(--curva);
+}
+
+a:hover {
+    color: var(--dorado-claro);
+    text-decoration-thickness: 2px;
+}
+
+/* contorno visible al moverse con el teclado */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--dorado);
+    outline-offset: 2px;
+}
+
+/* ---------- campos y botones ---------- */
+select,
+input[type="number"] {
+    font: inherit;
+    font-size: 1rem;
+    color: var(--hueso);
+    background: var(--campo);
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--borde-campo);
+    border-radius: 4px;
+}
+
+/* las opciones de la lista también oscuras (Windows) */
+select option {
+    color: var(--hueso);
+    background: var(--campo);
+}
+
+/* botón Buscar: hueso con texto oscuro */
+button {
+    font: inherit;
+    font-weight: 600;
+    height: 44px;
+    padding: 0 var(--e3);
+    border: 0;
+    border-radius: 4px;
+    background: var(--hueso);
+    color: var(--fondo);
+    cursor: pointer;
+    transition: background-color 160ms var(--curva), transform 120ms var(--curva);
+}
+
+button:hover {
+    background: #ffffff;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ---------- catálogo: buscador ---------- */
+.filtros {
+    background: var(--tarjeta);
+    border-radius: 4px;
+    padding: var(--e3);
+    margin-bottom: var(--e4);
+}
+
+.filtros h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: var(--e2);
+}
+
+.filtros form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--e2) var(--e3);
+}
+
+/* la etiqueta va arriba de su campo */
+.filtros label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e1);
+    flex: 1 1 200px;
+    font-size: 0.875rem;
+    color: var(--gris-claro);
+}
+
+.filtros form > a {
+    line-height: 44px;
+}
+
+/* logo TEMPORAL: pasa a la plantilla.
+   La imagen tiene fondo negro y el nombre ocupa solo el centro,
+   así que se recorta y se "funde" con el fondo de la página */
+.logo {
+    display: block;
+    position: relative;
+    width: 276px;
+    height: 136px;                /* el nombre queda de unos 260 px de ancho */
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: var(--e3);
+}
+
+/* en el detalle el logo va centrado arriba */
+.logo-centrado {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.logo img {
+    position: absolute;
+    left: -91px;
+    top: -59px;
+    width: 460px;
+    max-width: none;
+    height: auto;
+    mix-blend-mode: lighten;      /* el negro de la imagen toma el color del fondo */
+}
+
+/* ---------- catálogo: tarjetas ---------- */
+/* 4 columnas en pantallas anchas (abajo cambian según el ancho) */
+.tarjetas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--e3);
+}
+
+.tarjeta {
+    display: flex;
+    flex-direction: column;
+    background: var(--tarjeta);
+    border-radius: 4px;
+    overflow: hidden;              /* recorta la foto cuando se acerca */
+    padding-bottom: var(--e3);
+}
+
+/* la foto llega a los bordes de la tarjeta (4:3) */
+.tarjeta img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    transform-origin: center bottom;   /* crece hacia arriba, no tapa el nombre */
+    transition: transform 400ms var(--curva);
+}
+
+/* al pasar el mouse o al llegar con el teclado, la foto se acerca un poco */
+.tarjeta:hover img,
+.tarjeta:focus-within img {
+    transform: scale(1.05);
+}
+
+/* texto mínimo: nombre, precio, estado y enlace */
+.tarjeta h3 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    font-stretch: 75%;
+    margin: var(--e2) var(--e3) var(--e1);
+}
+
+.tarjeta p {
+    margin: 0 var(--e3);
+    color: var(--gris-claro);
+    font-size: 0.875rem;
+}
+
+.tarjeta .precio {
+    color: var(--hueso);
+    font-size: 1.125rem;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+}
+
+/* el enlace queda siempre abajo, aunque el nombre ocupe dos líneas */
+.tarjeta > a {
+    margin: auto var(--e3) 0;
+    padding-top: var(--e2);
+    font-weight: 600;
+}
+
+/* ---------- estado vendido ---------- */
+.vendido {
+    color: var(--rojo-vendido);
+    font-weight: 600;
+}
+
+span.vendido {
+    background: var(--rojo-fondo);
+    padding: 1px var(--e1);
+    border-radius: 4px;
+}
+
+p.vendido {
+    background: var(--rojo-fondo);
+    padding: var(--e2);
+    border-radius: 4px;
+    margin: 0;
+}
+
+/* ---------- detalle de vehículo ---------- */
+/* si el auto no tiene especificaciones: foto a la izquierda y ficha a la derecha */
+.columna-principal {
+    display: grid;
+    grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
+    gap: var(--e4);
+    align-items: start;
+}
+
+/* si tiene especificaciones: fotos y ficha a la izquierda, tablas a la derecha.
+   Las dos columnas miden lo mismo de alto (stretch) */
+.con-especificaciones {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: var(--e4);
+    align-items: stretch;
+}
+
+/* columna izquierda: foto, miniaturas y ficha, una debajo de otra */
+.con-especificaciones .columna-principal {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;         /* foto y ficha ocupan todo el ancho de la columna */
+    gap: var(--e3);
+}
+
+/* si a la izquierda sobra alto, lo toma la foto (no queda un hueco) */
+.con-especificaciones .fotos {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.con-especificaciones .fotos .principal {
+    flex: 1 1 auto;
+    max-height: 75vh;             /* que la foto no sea más alta que la pantalla */
+    object-fit: cover;            /* crece sin deformarse, recorta un poco los bordes */
+    object-position: center;      /* si recorta, recorta lo mismo arriba y abajo */
+}
+
+/* la ficha queda de su tamaño, no se estira */
+.con-especificaciones .datos {
+    flex: none;
+}
+
+/* ficha compacta (solo cuando hay especificaciones al lado):
+   Marca | Modelo, luego el Precio solo, luego Categoría | Estado,
+   y la Descripción y la acción a todo el ancho */
+.con-especificaciones .datos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--e4);
+}
+
+.con-especificaciones .datos > p {
+    border-top: 1px solid var(--linea);
+}
+
+/* la primera fila (Marca y Modelo) no lleva línea arriba */
+.con-especificaciones .datos > p:nth-of-type(1),
+.con-especificaciones .datos > p:nth-of-type(2) {
+    border-top: 0;
+}
+
+/* a todo el ancho: el precio, "Descripción:" con su texto (los dos últimos párrafos) y la acción */
+.con-especificaciones .datos > .precio,
+.con-especificaciones .datos > p:nth-last-of-type(-n+2),
+.con-especificaciones .datos > .accion {
+    grid-column: 1 / -1;
+}
+
+/* el texto de la descripción va pegado a su etiqueta, sin línea */
+.con-especificaciones .datos > p:not(:has(strong)) {
+    border-top: 0;
+}
+
+.fotos .principal {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.miniaturas {
+    display: flex;
+    gap: var(--e1);
+    margin-top: var(--e2);
+}
+
+.miniaturas a {
+    display: block;
+    line-height: 0;
+    border-radius: 4px;
+}
+
+.miniaturas img {
+    width: 90px;
+    height: 60px;
+    object-fit: cover;
+    border: 2px solid var(--linea);
+    border-radius: 4px;
+}
+
+/* la ficha: cada dato en su fila, etiqueta a la izquierda */
+.datos {
+    background: var(--tarjeta);
+    border-radius: 4px;
+    padding: var(--e1) var(--e3) var(--e3);
+}
+
+.datos > p {
+    display: flex;
+    gap: var(--e2);
+    align-items: baseline;
+    margin: 0;
+    padding: var(--e2) 0;
+}
+
+.datos > p + p {
+    border-top: 1px solid var(--linea);
+}
+
+.datos > p strong {
+    flex: 0 0 7.5em;
+    font-weight: 400;
+    font-size: 0.9375rem;
+    color: var(--gris-claro);
+}
+
+.datos .precio {
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* el texto de la descripción (el único párrafo sin etiqueta) */
+.datos > p:not(:has(strong)) {
+    display: block;
+    border-top: 0;
+    padding-top: 0;
+    max-width: 65ch;
+}
+
+.accion {
+    margin-top: var(--e3);
+}
+
+/* Solicitar compra: dorado con texto oscuro */
+.accion button {
+    width: 100%;
+    height: 48px;
+    background: var(--dorado);
+    color: var(--fondo);
+}
+
+.accion button:hover {
+    background: var(--dorado-claro);
+}
+
+/* el enlace del visitante se ve como botón con borde dorado */
+.accion > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    border: 1px solid var(--dorado);
+    border-radius: 4px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.accion > a:hover {
+    background: var(--campo);
+}
+
+/* ---------- especificaciones técnicas (tablas) ---------- */
+/* el panel llena el alto de su columna; si sobra espacio,
+   se reparte dentro de las tablas (filas más altas), no al final */
+.especificaciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e3);
+    background: var(--tarjeta);
+    border-radius: 4px;
+    padding: var(--e3);
+}
+
+.especificaciones h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-stretch: 75%;
+}
+
+.especificaciones table {
+    width: 100%;
+    border-collapse: collapse;
+    flex: 1 1 auto;
+}
+
+/* el espacio extra se reparte según cuántas filas tiene cada tabla (6 y 2),
+   así todas las filas quedan del mismo alto */
+.especificaciones table:first-of-type {
+    flex-grow: 6;
+}
+
+.especificaciones table:last-of-type {
+    flex-grow: 2;
+}
+
+/* el nombre de cada tabla, arriba a la izquierda */
+.especificaciones caption {
+    text-align: left;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    padding-bottom: var(--e1);
+}
+
+.especificaciones th,
+.especificaciones td {
+    text-align: left;
+    vertical-align: middle;       /* si la fila queda más alta, el texto va al centro */
+    padding: 12px 0;
+    border-top: 1px solid var(--linea);
+}
+
+/* el nombre del dato (Motor, Potencia...) en gris, el valor en hueso */
+.especificaciones th {
+    width: 9.5em;
+    padding-right: var(--e2);
+    font-weight: 400;
+    font-size: 0.9375rem;
+    color: var(--gris-claro);
+}
+
+.especificaciones td {
+    color: var(--hueso);
+    font-variant-numeric: tabular-nums;
+}
+
+.especificaciones .nota {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--gris-claro);
+}
+
+/* ---------- pantallas anchas: tablas de especificaciones un poco más grandes ---------- */
+@media (min-width: 1440px) {
+    .especificaciones caption {
+        font-size: 1.1875rem;
+    }
+
+    .especificaciones th {
+        font-size: 1rem;
+    }
+
+    .especificaciones td {
+        font-size: 1.125rem;
+    }
+
+    .especificaciones th,
+    .especificaciones td {
+        padding-top: 18px;
+        padding-bottom: 18px;
+    }
+}
+
+/* ---------- columnas del catálogo según el ancho ---------- */
+/* 5 columnas en pantallas de más de 1800 px */
+@media (min-width: 1801px) {
+    .tarjetas {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1199px) {
+    .tarjetas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 899px) {
+    .tarjetas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 599px) {
+    .tarjetas {
+        grid-template-columns: 1fr;
+        gap: var(--e2);
+    }
+}
+
+/* ---------- tableta: el detalle en una sola columna ---------- */
+/* primero fotos y ficha, después las especificaciones */
+@media (max-width: 1024px) {
+    .con-especificaciones {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .columna-principal {
+        grid-template-columns: 1fr;
+        gap: var(--e3);
+    }
+}
+
+/* ---------- celular ---------- */
+@media (max-width: 700px) {
+    main {
+        padding: var(--e4) var(--e2) var(--e6);
+    }
+
+    h1 {
+        font-size: 2rem;          /* 32 px */
+        margin-bottom: var(--e3);
+    }
+
+    h1:has(+ .detalle) {
+        font-size: 2.25rem;       /* 36 px */
+    }
+
+    .filtros {
+        padding: var(--e2);
+        margin-bottom: var(--e3);
+    }
+
+    /* un campo debajo del otro */
+    .filtros label {
+        flex-basis: 100%;
+    }
+
+    .datos {
+        padding: var(--e1) var(--e2) var(--e2);
+    }
+
+    .especificaciones {
+        padding: var(--e2);
+    }
+
+    /* en el celular la ficha vuelve a una sola columna */
+    .con-especificaciones .datos {
+        grid-template-columns: 1fr;
+    }
+
+    .con-especificaciones .datos > p:nth-of-type(2) {
+        border-top: 1px solid var(--linea);
+    }
+
+    .especificaciones th {
+        width: 7.5em;
+    }
+}
+
+/* si la persona pidió menos movimiento en su equipo */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+
+    button:active {
+        transform: none;
+    }
+
+    /* sin acercamiento de la foto */
+    .tarjeta:hover img,
+    .tarjeta:focus-within img {
+        transform: none;
+    }
+}
