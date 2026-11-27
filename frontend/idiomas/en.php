@@ -298,4 +298,5 @@ return [
     "modelo3d.alt"                    => "3D model of the %s",
     "modelo3d.credito"                => "3D model %s by %s, %s license.",
     "modelo3d.ver_original"           => "see original",
+    "video.credito"                   => "Video %s by %s, %s license.",
 ];

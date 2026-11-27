@@ -13,8 +13,9 @@ require_once __DIR__ . "/../backend/funciones/acceso.php";
 require_once __DIR__ . "/datos/especificaciones.php";
 // cifras cortas (potencia, aceleración...) sacadas de las especificaciones
 require_once __DIR__ . "/includes/cifras.php";
-// créditos de los modelos 3D
+// créditos de los modelos 3D y de los videos
 require_once __DIR__ . "/datos/modelos3d.php";
+require_once __DIR__ . "/datos/videos.php";
 // textos traducidos: interfaz (t), categorías, descripciones y ficha técnica
 require_once __DIR__ . "/includes/idioma.php";
 require_once __DIR__ . "/datos/valores.php";
@@ -144,8 +145,9 @@ if ($vehiculo !== null) {
         $base = "img/vehiculos/videos/" . (int) $vehiculo["id"] . "-" . $n;
         if (is_file(__DIR__ . "/../" . $base . ".mp4")) {
             $videos[$n] = [
-                "video"  => "../" . $base . ".mp4",
-                "poster" => is_file(__DIR__ . "/../" . $base . ".jpg") ? "../" . $base . ".jpg" : "",
+                "video"   => "../" . $base . ".mp4",
+                "poster"  => is_file(__DIR__ . "/../" . $base . ".jpg") ? "../" . $base . ".jpg" : "",
+                "credito" => $creditosVideos[(int) $vehiculo["id"] . "-" . $n] ?? null,
             ];
         }
     }
@@ -167,6 +169,18 @@ if ($vehiculo !== null) {
         $creditoModelo = $modelos3d[$idAuto] ?? null;
         $pinturaModelo = $pinturas3d[$idAuto] ?? null;
     }
+}
+
+// crédito de un video que lo pide (licencia CC): "Video «título» de autor, licencia X."
+function creditoVideo($credito)
+{
+    if ($credito === null) {
+        return "";
+    }
+    $enlace = '<a href="' . htmlspecialchars($credito["enlace"]) . '" target="_blank" rel="noopener">«'
+        . htmlspecialchars($credito["titulo"]) . '»</a>';
+    $texto = htmlspecialchars(t("video.credito", "[enlace]", $credito["autor"], $credito["licencia"]));
+    return '<p class="modelo-video-credito">' . str_replace("[enlace]", $enlace, $texto) . '</p>';
 }
 
 // texto de apoyo que se repite
@@ -355,6 +369,7 @@ require_once __DIR__ . "/includes/menu.php";
                    <?php if ($videos[1]["poster"] !== "") { echo 'poster="' . htmlspecialchars($videos[1]["poster"]) . '"'; } ?>>
                 <source src="<?php echo htmlspecialchars($videos[1]["video"]); ?>" type="video/mp4">
             </video>
+            <?php echo creditoVideo($videos[1]["credito"]); ?>
             <!-- data-texto-*: los textos traducidos que usa vehiculo.js -->
             <button type="button" class="boton-pausa video-pausa"
                     aria-label="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
@@ -405,6 +420,7 @@ require_once __DIR__ . "/includes/menu.php";
                    <?php if ($videos[2]["poster"] !== "") { echo 'poster="' . htmlspecialchars($videos[2]["poster"]) . '"'; } ?>>
                 <source src="<?php echo htmlspecialchars($videos[2]["video"]); ?>" type="video/mp4">
             </video>
+            <?php echo creditoVideo($videos[2]["credito"]); ?>
             <button type="button" class="boton-pausa video-pausa"
                     aria-label="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
                     data-texto-pausar="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
