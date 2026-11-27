@@ -1,0 +1,27 @@
+Modelos 3D de los autos
+=======================
+
+Pon aquí el modelo 3D de cada auto en formato .glb, con el número (id) del auto:
+
+  1.glb   Nissan Skyline GT-R (R34)
+  2.glb   Nissan GT-R (R35)
+  3.glb   Toyota Supra
+  4.glb   Mazda RX-7 (FD)
+  5.glb   Porsche 911 Carrera
+  6.glb   BMW M4
+  7.glb   Audi R8
+  8.glb   Ferrari 458
+  9.glb   Lamborghini Aventador SV
+  10.glb  McLaren 650S Spider
+  11.glb  Chevrolet Corvette C7
+  12.glb  Ford Mustang Shelby GT350
+  13.glb  Ford Mustang Shelby GT500
+  14.glb  McLaren 570S Spider
+
+En cuanto el archivo existe, la página del auto muestra la sección "En 3D"
+y el catálogo cambia el botón a "Ver en 3D". Si no existe, no se muestra nada.
+
+Si el modelo tiene licencia "CC Attribution", agrega el crédito del autor en
+frontend/datos/modelos3d.php (ahí hay un ejemplo).
+
+Recomendado: que cada archivo pese menos de 10 MB.

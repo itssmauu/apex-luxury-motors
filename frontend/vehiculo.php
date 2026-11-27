@@ -11,6 +11,10 @@ require_once __DIR__ . "/../backend/funciones/vehiculos.php";
 require_once __DIR__ . "/../backend/funciones/acceso.php";
 // especificaciones técnicas: están en un archivo aparte porque la base no las guarda
 require_once __DIR__ . "/datos/especificaciones.php";
+// cifras cortas (potencia, aceleración...) sacadas de las especificaciones
+require_once __DIR__ . "/includes/cifras.php";
+// créditos de los modelos 3D
+require_once __DIR__ . "/datos/modelos3d.php";
 
 // el id viene en la dirección: vehiculo.php?id=8
 $id = isset($_GET["id"]) && is_string($_GET["id"]) ? $_GET["id"] : 0;
@@ -103,48 +107,8 @@ if ($vehiculo !== null && isset($especificaciones[(int) $vehiculo["id"]])) {
     $fichaTecnica = $especificaciones[(int) $vehiculo["id"]];
 }
 
-// devuelve el dato si existe y no dice "No disponible"
-function datoFicha($ficha, $nombre)
-{
-    if (!isset($ficha[$nombre]) || $ficha[$nombre] === "" || $ficha[$nombre] === "No disponible") {
-        return "";
-    }
-    return $ficha[$nombre];
-}
-
-// saca la cifra corta de un texto largo: de "570 CV a 9,000 rpm (≈562 hp)" queda "570 CV".
-// Prueba los patrones en orden y devuelve lo primero que encuentre.
-function cifraCorta($texto, $patrones)
-{
-    foreach ($patrones as $patron) {
-        if (preg_match('/((?:≈|Más de |Menos de )?\d[\d.,–]*\s?' . $patron . ')/u', $texto, $encontrado)) {
-            return $encontrado[1];
-        }
-    }
-    return "";
-}
-
-// las cifras grandes de la escena "Rendimiento" (solo las que tienen dato)
-$cifras = [];
-$potencia = cifraCorta(datoFicha($fichaTecnica, "Potencia"), ["(?:PS|CV|bhp|hp)\b", "kW\b"]);
-if ($potencia !== "") {
-    $cifras[] = ["valor" => $potencia, "nombre" => "Potencia máxima"];
-}
-$aceleracionTexto = datoFicha($fichaTecnica, "Aceleración");
-$aceleracion = cifraCorta($aceleracionTexto, ["s\b"]);
-if ($aceleracion !== "") {
-    // la fuente da la cifra de 0 a 60 mph o de 0 a 100 km/h: se dice cuál es
-    $tramo = (strpos($aceleracionTexto, "0–60") !== false) ? "0–60 mph" : "0–100 km/h";
-    $cifras[] = ["valor" => $aceleracion, "nombre" => "Aceleración " . $tramo];
-}
-$velocidad = cifraCorta(datoFicha($fichaTecnica, "Velocidad máxima"), ["km\/h"]);
-if ($velocidad !== "") {
-    $cifras[] = ["valor" => $velocidad, "nombre" => "Velocidad máxima"];
-}
-$torque = cifraCorta(datoFicha($fichaTecnica, "Torque"), ["N·m"]);
-if ($torque !== "") {
-    $cifras[] = ["valor" => $torque, "nombre" => "Torque máximo"];
-}
+// las cifras grandes de la escena "Rendimiento" (las funciones están en includes/cifras.php)
+$cifras = cifrasDestacadas($fichaTecnica);
 
 // qué filas van en cada tabla de especificaciones
 $tablasTecnicas = [
@@ -175,6 +139,24 @@ if ($vehiculo !== null) {
                 "poster" => is_file(__DIR__ . "/../" . $base . ".jpg") ? "../" . $base . ".jpg" : "",
             ];
         }
+    }
+}
+
+// ---------- sonido del motor y modelo 3D (opcionales) ----------
+// audio/motores/8.mp3 y img/vehiculos/modelos/8.glb para el auto con id 8
+$sonidoMotor = "";
+$modelo3d = "";
+$creditoModelo = null;
+$pinturaModelo = null;
+if ($vehiculo !== null) {
+    $idAuto = (int) $vehiculo["id"];
+    if (is_file(__DIR__ . "/../audio/motores/" . $idAuto . ".mp3")) {
+        $sonidoMotor = "../audio/motores/" . $idAuto . ".mp3";
+    }
+    if (is_file(__DIR__ . "/../img/vehiculos/modelos/" . $idAuto . ".glb")) {
+        $modelo3d = "../img/vehiculos/modelos/" . $idAuto . ".glb";
+        $creditoModelo = $modelos3d[$idAuto] ?? null;
+        $pinturaModelo = $pinturas3d[$idAuto] ?? null;
     }
 }
 
@@ -222,6 +204,25 @@ require_once __DIR__ . "/includes/menu.php";
                     <span class="sello">Disponible</span>
                 <?php endif; ?>
             </p>
+
+            <?php if ($modelo3d !== "" || $sonidoMotor !== ""): ?>
+                <div class="modelo-portada-acciones">
+                    <?php if ($modelo3d !== ""): ?>
+                        <a class="boton-borde" href="#modelo-3d"><span aria-hidden="true">↻</span> Ver en 3D</a>
+                    <?php endif; ?>
+                    <?php if ($sonidoMotor !== ""): ?>
+                        <!-- botón de encendido: suena el motor (lo activa js/motor.js) -->
+                        <span class="motor-con-texto">
+                            <button type="button" class="motor" data-sonido="<?php echo htmlspecialchars($sonidoMotor); ?>"
+                                    aria-pressed="false" aria-label="Encender el motor del <?php echo htmlspecialchars($nombreAuto); ?>" hidden>
+                                <span class="motor-icono" aria-hidden="true"></span>
+                                <span class="motor-texto" aria-hidden="true">Engine<br>Start</span>
+                            </button>
+                            <span class="motor-leyenda" aria-hidden="true">Escucha el motor</span>
+                        </span>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- invitación a bajar (decorativa) -->
@@ -233,6 +234,9 @@ require_once __DIR__ . "/includes/menu.php";
         <p class="modelo-barra-nombre" aria-hidden="true"><?php echo htmlspecialchars($nombreAuto); ?></p>
         <ul>
             <li><a href="#diseno">Diseño</a></li>
+            <?php if ($modelo3d !== ""): ?>
+                <li><a href="#modelo-3d">3D</a></li>
+            <?php endif; ?>
             <?php if (count($cifras) > 0): ?>
                 <li><a href="#rendimiento">Rendimiento</a></li>
             <?php endif; ?>
@@ -277,6 +281,58 @@ require_once __DIR__ . "/includes/menu.php";
             <?php endif; ?>
         </div>
     </section>
+
+    <?php if ($modelo3d !== ""): ?>
+        <!-- ===== 3D: el modelo del auto, se gira con el mouse o el dedo =====
+             model-viewer es el visor 3D de Google (se carga al final de la página) -->
+        <section class="modelo-3d" id="modelo-3d" aria-labelledby="titulo-3d">
+            <div class="modelo-3d-cabecera">
+                <div>
+                    <p class="sobretitulo">En 3D</p>
+                    <h2 id="titulo-3d" class="escena-titulo"><?php echo htmlspecialchars($vehiculo["modelo"]); ?></h2>
+                </div>
+                <p class="modelo-3d-pista">Arrastra para girar · Rueda o pellizco para acercar</p>
+            </div>
+
+            <model-viewer class="modelo-3d-visor"
+                          src="<?php echo htmlspecialchars($modelo3d); ?>"
+                          alt="Modelo 3D del <?php echo htmlspecialchars($nombreAuto); ?>"
+                          camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="18deg"
+                          interaction-prompt="none" touch-action="pan-y" loading="lazy"
+                          shadow-intensity="1" shadow-softness="0.8" exposure="1.05"
+                          environment-image="neutral" field-of-view="28deg"
+                          camera-orbit="<?php echo htmlspecialchars($creditoModelo["angulo"] ?? "-40deg"); ?> 75deg 75%"
+                          <?php if ($pinturaModelo !== null): ?>data-pintura="<?php echo htmlspecialchars(json_encode($pinturaModelo)); ?>"<?php endif; ?>>
+                <?php if ($fotoPortada !== null): ?>
+                    <!-- mientras carga el modelo se ve esta foto; si el visor no puede cargar
+                         (por ejemplo, sin internet), la foto se queda en su lugar -->
+                    <img slot="poster" class="modelo-3d-foto" src="<?php echo htmlspecialchars($fotoPortada["ruta"]); ?>" alt="">
+                <?php endif; ?>
+            </model-viewer>
+
+            <div class="modelo-3d-pie">
+                <?php if ($sonidoMotor !== ""): ?>
+                    <span class="motor-con-texto">
+                        <button type="button" class="motor" data-sonido="<?php echo htmlspecialchars($sonidoMotor); ?>"
+                                aria-pressed="false" aria-label="Encender el motor del <?php echo htmlspecialchars($nombreAuto); ?>" hidden>
+                            <span class="motor-icono" aria-hidden="true"></span>
+                            <span class="motor-texto" aria-hidden="true">Engine<br>Start</span>
+                        </button>
+                        <span class="motor-leyenda" aria-hidden="true">Escucha el motor</span>
+                    </span>
+                <?php endif; ?>
+                <?php if ($creditoModelo !== null): ?>
+                    <!-- crédito que pide la licencia del modelo -->
+                    <p class="modelo-3d-credito">
+                        Modelo 3D
+                        <a href="<?php echo htmlspecialchars($creditoModelo["enlace"]); ?>" target="_blank" rel="noopener">«<?php echo htmlspecialchars($creditoModelo["titulo"] ?? "ver original"); ?>»</a>
+                        de <?php echo htmlspecialchars($creditoModelo["autor"]); ?>,
+                        licencia <?php echo htmlspecialchars($creditoModelo["licencia"]); ?>.
+                    </p>
+                <?php endif; ?>
+            </div>
+        </section>
+    <?php endif; ?>
 
     <?php if (isset($videos[1])): ?>
         <!-- video 1 (solo si el archivo existe) -->
@@ -501,6 +557,15 @@ require_once __DIR__ . "/includes/menu.php";
 
 <!-- galería y videos de esta página -->
 <script src="/apex/frontend/js/vehiculo.js?v=1"></script>
+<?php if ($sonidoMotor !== ""): ?>
+    <!-- botón de encendido del motor -->
+    <script src="/apex/frontend/js/motor.js?v=1"></script>
+<?php endif; ?>
+<?php if ($modelo3d !== ""): ?>
+    <!-- color de la pintura del modelo 3D, y después el visor 3D de Google (necesita internet) -->
+    <script src="/apex/frontend/js/modelo3d.js?v=2"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
+<?php endif; ?>
 <?php endif; ?>
 
 <?php require_once __DIR__ . "/includes/pie.php"; ?>
