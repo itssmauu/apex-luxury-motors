@@ -218,3 +218,81 @@ function desactivarVehiculo($id)
 
     return ['ok' => true, 'mensaje' => 'Vehículo desactivado.'];
 }
+
+// Fotos de un vehículo, en orden (para mostrarlas en el formulario del admin)
+function listarFotosVehiculo($vehiculoId) {
+    global $conexion;
+
+    $consulta = $conexion->prepare(
+        "SELECT id, ruta, orden FROM fotos WHERE vehiculo_id = ? ORDER BY orden ASC, id ASC"
+    );
+    $consulta->execute([(int) $vehiculoId]);
+    return $consulta->fetchAll();
+}
+
+// Sube una foto y la asocia a un vehículo (solo administrador)
+function subirFotoVehiculo($vehiculoId, $archivo) {
+    global $conexion;
+
+    // el rol se verifica en el servidor
+    if (($_SESSION["rol"] ?? "") !== "administrador") {
+        return ["ok" => false, "mensaje" => "Acceso denegado."];
+    }
+
+    // el vehículo debe existir
+    $consulta = $conexion->prepare("SELECT id FROM vehiculos WHERE id = ?");
+    $consulta->execute([(int) $vehiculoId]);
+    if (!$consulta->fetch()) {
+        return ["ok" => false, "mensaje" => "El vehículo no existe."];
+    }
+
+    // el navegador debe haber enviado un archivo
+    if (!is_array($archivo) || ($archivo["error"] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return ["ok" => false, "mensaje" => "Selecciona una foto."];
+    }
+    if ($archivo["error"] !== UPLOAD_ERR_OK) {
+        return ["ok" => false, "mensaje" => "No se pudo subir la foto. Intenta de nuevo."];
+    }
+
+    // tamaño máximo: 5 MB
+    if ($archivo["size"] > 5 * 1024 * 1024) {
+        return ["ok" => false, "mensaje" => "La foto no puede pesar más de 5 MB."];
+    }
+
+    // el tipo se lee del contenido real, no del nombre del archivo
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $tipo = finfo_file($finfo, $archivo["tmp_name"]);
+    finfo_close($finfo);
+
+    $extensiones = [
+        "image/jpeg" => "jpg",
+        "image/png"  => "png",
+        "image/webp" => "webp"
+    ];
+
+    if (!isset($extensiones[$tipo]) || getimagesize($archivo["tmp_name"]) === false) {
+        return ["ok" => false, "mensaje" => "Solo se permiten fotos JPG, PNG o WEBP."];
+    }
+
+    // nombre propio y único: nunca se usa el nombre que envía el usuario
+    $carpeta = __DIR__ . "/../../img/subidas/";
+    if (!is_dir($carpeta)) {
+        mkdir($carpeta, 0777, true);
+    }
+
+    $nombre = "vehiculo_" . (int) $vehiculoId . "_" . bin2hex(random_bytes(6)) . "." . $extensiones[$tipo];
+
+    if (!move_uploaded_file($archivo["tmp_name"], $carpeta . $nombre)) {
+        return ["ok" => false, "mensaje" => "No se pudo guardar la foto."];
+    }
+
+    // siguiente posición dentro de las fotos de ese vehículo
+    $consulta = $conexion->prepare("SELECT COALESCE(MAX(orden), 0) + 1 FROM fotos WHERE vehiculo_id = ?");
+    $consulta->execute([(int) $vehiculoId]);
+    $orden = (int) $consulta->fetchColumn();
+
+    $consulta = $conexion->prepare("INSERT INTO fotos (vehiculo_id, ruta, orden) VALUES (?, ?, ?)");
+    $consulta->execute([(int) $vehiculoId, "img/subidas/" . $nombre, $orden]);
+
+    return ["ok" => true, "mensaje" => "Foto subida."];
+}
