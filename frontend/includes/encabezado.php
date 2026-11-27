@@ -26,7 +26,7 @@ $inicialCuenta = ($nombreCuenta !== "") ? mb_strtoupper(mb_substr($nombreCuenta,
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo htmlspecialchars($titulo); ?> - Apex Luxury Motors (demo)</title>
     <!-- estilos de todo el sitio; subir el ?v= cuando cambie el CSS para que el navegador baje la versión nueva -->
-    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=12">
+    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=13">
     <!-- avisa al CSS que hay JavaScript: así lo que aparece al hacer scroll
          solo se oculta si de verdad hay quien lo muestre -->
     <script>document.documentElement.classList.add("con-js");</script>
