@@ -5,8 +5,9 @@
 
 require_once __DIR__ . "/../../backend/funciones/acceso.php";
 require_once __DIR__ . "/../../backend/funciones/solicitudes.php";
-// foto principal de cada auto
+// foto principal de cada auto y textos traducidos (t)
 require_once __DIR__ . "/../includes/fotos.php";
+require_once __DIR__ . "/../includes/idioma.php";
 
 requerirRol("administrador");
 
@@ -20,7 +21,7 @@ foreach ($pendientes as $s) {
     $porVehiculo[(int) $s["vehiculo_id"]] = ($porVehiculo[(int) $s["vehiculo_id"]] ?? 0) + 1;
 }
 
-// "hoy", "hace 1 día", "hace 5 días"
+// "Hoy", "Hace 1 día", "Hace 5 días" (en el idioma elegido)
 function tiempoEsperando($fecha)
 {
     $tiempo = strtotime((string) $fecha);
@@ -29,12 +30,12 @@ function tiempoEsperando($fecha)
     }
     $dias = (int) floor((strtotime("today") - strtotime(date("Y-m-d", $tiempo))) / 86400);
     if ($dias <= 0) {
-        return "Hoy";
+        return t("admin.hoy");
     }
-    return ($dias === 1) ? "Hace 1 día" : "Hace " . $dias . " días";
+    return tPlural($dias, "admin.hace_uno", "admin.hace_varios");
 }
 
-$titulo = "Solicitudes pendientes";
+$titulo = t("admin.sol_pendientes");
 
 require_once __DIR__ . "/../includes/encabezado.php";
 require_once __DIR__ . "/../includes/menu.php";
@@ -48,12 +49,15 @@ require_once __DIR__ . "/../includes/menu.php";
             <source src="/apex/img/videos/acceso-calle.mp4" type="video/mp4">
         </video>
         <div class="contenedor revelar">
-            <p class="sobretitulo">Panel de administración</p>
-            <h1 id="titulo-solicitudes" class="titulo-grande">Solicitudes</h1>
-            <p class="solicitudes-bajada">Solicitudes de compra por atender. Las más antiguas aparecen primero.</p>
+            <p class="sobretitulo"><?php echo htmlspecialchars(t("admin.panel")); ?></p>
+            <h1 id="titulo-solicitudes" class="titulo-grande"><?php echo htmlspecialchars(t("menu.solicitudes")); ?></h1>
+            <p class="solicitudes-bajada"><?php echo htmlspecialchars(t("admin.sol_bajada")); ?></p>
         </div>
-        <button type="button" class="boton-pausa video-pausa" aria-label="Pausar video"
-                data-texto-pausar="Pausar video" data-texto-reproducir="Reproducir video" hidden>
+        <!-- data-texto-*: los textos traducidos que usa zoom_scroll.js -->
+        <button type="button" class="boton-pausa video-pausa"
+                aria-label="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
+                data-texto-pausar="<?php echo htmlspecialchars(t("vehiculo.pausar_video")); ?>"
+                data-texto-reproducir="<?php echo htmlspecialchars(t("vehiculo.reproducir_video")); ?>" hidden>
             <span class="icono-pausa" aria-hidden="true"></span>
         </button>
     </section>
@@ -62,26 +66,26 @@ require_once __DIR__ . "/../includes/menu.php";
         <!-- cifras: número grande arriba y su nombre abajo -->
         <dl class="cifras cifras-3 solicitudes-cifras" data-zoom>
             <div class="revelar" style="--i: 0">
-                <dt>Por atender</dt>
+                <dt><?php echo htmlspecialchars(t("admin.por_atender")); ?></dt>
                 <dd><?php echo count($pendientes); ?></dd>
             </div>
             <div class="revelar" style="--i: 1">
-                <dt>Clientes</dt>
+                <dt><?php echo htmlspecialchars(t("admin.clientes")); ?></dt>
                 <dd><?php echo count($clientes); ?></dd>
             </div>
             <div class="revelar" style="--i: 2">
-                <dt>Vehículos solicitados</dt>
+                <dt><?php echo htmlspecialchars(t("admin.vehiculos_solicitados")); ?></dt>
                 <dd><?php echo count($porVehiculo); ?></dd>
             </div>
         </dl>
 
         <?php if (count($pendientes) === 0): ?>
             <div class="solicitudes-vacio revelar">
-                <p>No hay solicitudes pendientes. Todo está al día.</p>
-                <a class="boton-linea" href="/apex/frontend/admin/vehiculos.php">Ir al inventario</a>
+                <p><?php echo htmlspecialchars(t("admin.sin_pendientes")); ?></p>
+                <a class="boton-linea" href="/apex/frontend/admin/vehiculos.php"><?php echo htmlspecialchars(t("llamado.ir_inventario")); ?></a>
             </div>
         <?php else: ?>
-            <h2 class="solo-lector">Solicitudes de compra por atender</h2>
+            <h2 class="solo-lector"><?php echo htmlspecialchars(t("admin.sol_caption")); ?></h2>
 
             <ul class="inventario-lista">
                 <?php foreach ($pendientes as $numero => $s): ?>
@@ -97,12 +101,12 @@ require_once __DIR__ . "/../includes/menu.php";
                                 <img src="<?php echo htmlspecialchars($foto); ?>" alt="" width="320" height="200"
                                      <?php if ($numero > 3) { echo 'loading="lazy"'; } ?>>
                             <?php else: ?>
-                                <span>Sin foto</span>
+                                <span><?php echo htmlspecialchars(t("admin.sin_foto")); ?></span>
                             <?php endif; ?>
                         </a>
 
                         <div class="inventario-datos">
-                            <p class="inventario-categoria">Solicitud #<?php echo (int) $s["id"]; ?></p>
+                            <p class="inventario-categoria"><?php echo htmlspecialchars(t("solicitudes.numero", (int) $s["id"])); ?></p>
                             <h3 class="inventario-nombre">
                                 <span class="inventario-marca"><?php echo htmlspecialchars($s["marca"]); ?></span>
                                 <?php echo htmlspecialchars($s["modelo"]); ?>
@@ -111,7 +115,7 @@ require_once __DIR__ . "/../includes/menu.php";
                                 <!-- aviso: al aprobar una, las demás de este auto se rechazan solas -->
                                 <p class="inventario-sellos">
                                     <span class="estado-sello estado-sello-oculto">
-                                        <?php echo ($otras === 1) ? "1 solicitud más por este auto" : $otras . " solicitudes más por este auto"; ?>
+                                        <?php echo htmlspecialchars(tPlural($otras, "admin.otra_uno", "admin.otra_varios")); ?>
                                     </span>
                                 </p>
                             <?php endif; ?>
@@ -133,8 +137,8 @@ require_once __DIR__ . "/../includes/menu.php";
 
                         <div class="inventario-acciones">
                             <a class="boton solicitud-revisar" href="<?php echo $enlace; ?>"
-                               aria-label="Revisar la solicitud de <?php echo htmlspecialchars($s["nombre"]); ?> por <?php echo htmlspecialchars($nombreVehiculo); ?>">
-                                Revisar
+                               aria-label="<?php echo htmlspecialchars(t("admin.revisar_aria", $s["nombre"], $nombreVehiculo)); ?>">
+                                <?php echo htmlspecialchars(t("admin.revisar")); ?>
                             </a>
                         </div>
                     </li>

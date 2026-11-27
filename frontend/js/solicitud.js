@@ -13,7 +13,10 @@
 
     var actualizar = function () {
         var quedan = limite - campo.value.length;
-        cuenta.textContent = (quedan === 1) ? "Queda 1 carácter." : "Quedan " + quedan + " caracteres.";
+        // textos traducidos que manda PHP (data-texto-*); el español queda de respaldo
+        var uno = cuenta.dataset.textoUno || "Queda 1 carácter.";
+        var varios = cuenta.dataset.textoVarios || "Quedan %s caracteres.";
+        cuenta.textContent = (quedan === 1) ? uno : varios.replace("%s", quedan);
     };
 
     campo.addEventListener("input", actualizar);
