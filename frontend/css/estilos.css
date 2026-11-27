@@ -3536,6 +3536,26 @@ button.boton-linea {
     color: var(--gris-claro);
 }
 
+/* avisos de las acciones con la API (encima de la lista) */
+.inventario-aviso:empty {
+    display: none;
+}
+
+.inventario-aviso .mensaje {
+    width: 100%;
+    margin: 0 0 var(--e3);
+}
+
+/* la fila que deja de pertenecer a la vista elegida se desvanece antes de salir */
+.inventario-fila {
+    transition: opacity 400ms var(--curva), transform 400ms var(--curva);
+}
+
+.inventario-fila-saliendo {
+    opacity: 0;
+    transform: translateX(24px);
+}
+
 .inventario-vacio {
     padding: var(--e6) 0;
     border-top: 1px solid var(--linea);
@@ -3604,6 +3624,10 @@ button.boton-linea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .inventario-fila {
+        transition: none;
+    }
+
     .inventario-fila:hover .inventario-foto img,
     .inventario-ver:hover span {
         transform: none;

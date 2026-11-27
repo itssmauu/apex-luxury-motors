@@ -2,6 +2,9 @@
 // Inventario de vehículos (RF8)
 // Diseño: encabezado grande, cifras que también sirven de filtro
 // y una fila por vehículo con su foto, sus datos y las acciones.
+// Esta pantalla consume la API propia (backend/api/vehiculos.php) con js/inventario.js:
+// "Marcar como vendido / disponible" usa PUT y "Desactivar" usa DELETE, sin recargar la página.
+// Sin JavaScript, "Desactivar" sigue funcionando con su formulario normal.
 
 // trae requerirRol() y abre la sesión
 require_once __DIR__ . "/../../backend/funciones/acceso.php";
@@ -90,6 +93,9 @@ require_once __DIR__ . "/../includes/menu.php";
         </ul>
     </nav>
 
+    <!-- avisos de las acciones hechas con la API (los escribe js/inventario.js) -->
+    <div class="inventario-aviso" id="inventario-aviso" aria-live="polite"></div>
+
     <?php if (count($vehiculosVista) === 0): ?>
         <div class="inventario-vacio">
             <p><?php echo htmlspecialchars((count($vehiculos) === 0) ? t("admin.sin_vehiculos") : t("admin.vista_vacia")); ?></p>
@@ -100,13 +106,35 @@ require_once __DIR__ . "/../includes/menu.php";
     <?php else: ?>
         <h2 class="solo-lector"><?php echo htmlspecialchars($vistas[$vistaActual]["nombre"]); ?></h2>
 
-        <ul class="inventario-lista">
+        <!-- data-api: dirección de la API; data-texto-*: textos traducidos que usa js/inventario.js -->
+        <ul class="inventario-lista" data-api="/apex/backend/api/vehiculos.php"
+            data-texto-disponible="<?php echo htmlspecialchars(t("estado_vehiculo.disponible")); ?>"
+            data-texto-vendido="<?php echo htmlspecialchars(t("estado_vehiculo.vendido")); ?>"
+            data-texto-fuera="<?php echo htmlspecialchars(t("admin.fuera_catalogo")); ?>"
+            data-texto-marcar-vendido="<?php echo htmlspecialchars(t("admin.marcar_vendido")); ?>"
+            data-texto-marcar-disponible="<?php echo htmlspecialchars(t("admin.marcar_disponible")); ?>"
+            data-texto-marcar-vendido-aria="<?php echo htmlspecialchars(t("admin.marcar_vendido_aria", "%s")); ?>"
+            data-texto-marcar-disponible-aria="<?php echo htmlspecialchars(t("admin.marcar_disponible_aria", "%s")); ?>"
+            data-texto-procesando="<?php echo htmlspecialchars(t("admin.procesando")); ?>"
+            data-texto-ok-desactivado="<?php echo htmlspecialchars(t("admin.ok_desactivado", "%s")); ?>"
+            data-texto-ok-vendido="<?php echo htmlspecialchars(t("admin.ok_vendido", "%s")); ?>"
+            data-texto-ok-disponible="<?php echo htmlspecialchars(t("admin.ok_disponible", "%s")); ?>"
+            data-texto-err-pendientes="<?php echo htmlspecialchars(t("admin.err_pendientes")); ?>"
+            data-texto-err-ya-desactivado="<?php echo htmlspecialchars(t("admin.err_ya_desactivado")); ?>"
+            data-texto-err-no-encontrado="<?php echo htmlspecialchars(t("admin.err_no_encontrado")); ?>"
+            data-texto-err-sesion="<?php echo htmlspecialchars(t("admin.err_sesion")); ?>"
+            data-texto-err-permiso="<?php echo htmlspecialchars(t("admin.err_permiso")); ?>"
+            data-texto-error="<?php echo htmlspecialchars(t("admin.api_error")); ?>">
             <?php foreach ($vehiculosVista as $numero => $v): ?>
                 <?php
                 $nombreVehiculo = $v["marca"] . " " . $v["modelo"];
                 $activo = ((int) $v["activo"] === 1);
                 ?>
-                <li class="inventario-fila<?php if (!$activo) { echo " inventario-fila-inactiva"; } ?>">
+                <li class="inventario-fila<?php if (!$activo) { echo " inventario-fila-inactiva"; } ?>"
+                    data-id="<?php echo (int) $v["id"]; ?>"
+                    data-nombre="<?php echo htmlspecialchars($nombreVehiculo); ?>"
+                    data-estado="<?php echo htmlspecialchars($v["estado"]); ?>"
+                    data-activo="<?php echo $activo ? "1" : "0"; ?>">
                     <div class="inventario-foto">
                         <?php if (!empty($v["foto"])): ?>
                             <!-- alt vacío: el nombre está justo al lado -->
@@ -149,12 +177,19 @@ require_once __DIR__ . "/../includes/menu.php";
                             </a>
                         <?php endif; ?>
 
+                        <?php if ($activo): ?>
+                            <!-- cambia el estado con la API (PUT); aparece solo con JavaScript -->
+                            <button type="button" class="boton-linea inventario-estado" hidden>
+                                <?php echo htmlspecialchars(($v["estado"] === "vendido") ? t("admin.marcar_disponible") : t("admin.marcar_vendido")); ?>
+                            </button>
+                        <?php endif; ?>
+
                         <a class="boton-linea" href="/apex/frontend/admin/vehiculo_form.php?id=<?php echo (int) $v["id"]; ?>"
                            aria-label="<?php echo htmlspecialchars(t("admin.editar_aria", $nombreVehiculo)); ?>"><?php echo htmlspecialchars(t("admin.editar")); ?></a>
 
                         <!-- solo se desactiva si está activo; el backend lo vuelve a validar -->
                         <?php if ($activo): ?>
-                            <form method="post" action="/apex/backend/procesos/vehiculo_desactivar.php">
+                            <form class="inventario-desactivar" method="post" action="/apex/backend/procesos/vehiculo_desactivar.php">
                                 <input type="hidden" name="id" value="<?php echo (int) $v["id"]; ?>">
                                 <button type="submit" class="boton-quitar"
                                         aria-label="<?php echo htmlspecialchars(t("admin.desactivar_aria", $nombreVehiculo)); ?>">
@@ -168,5 +203,8 @@ require_once __DIR__ . "/../includes/menu.php";
         </ul>
     <?php endif; ?>
 </main>
+
+<!-- acciones del inventario con la API (PUT y DELETE) -->
+<script src="/apex/frontend/js/inventario.js?v=1"></script>
 
 <?php require_once __DIR__ . "/../includes/pie.php"; ?>

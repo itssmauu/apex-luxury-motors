@@ -1,0 +1,1021 @@
+{
+    "info": {
+        "name": "Apex Luxury Motors - API",
+        "description": "Pruebas de la API de vehículos y de sesión. Ejecutar en orden: Postman guarda la cookie de la sesión. Documentación: backend/API.md",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "01 Ver vehículos",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });",
+                            "pm.test(\"Trae una lista\", function () { pm.expect(pm.response.json().datos).to.be.an(\"array\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "02 Filtrar por categoría y precio",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?categoria=Superdeportivo&precio_max=300000",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "categoria",
+                            "value": "Superdeportivo"
+                        },
+                        {
+                            "key": "precio_max",
+                            "value": "300000"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "03 Filtro inválido (400)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?precio_max=abc",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "precio_max",
+                            "value": "abc"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "04 Ver un vehículo",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id=8",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "8"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });",
+                            "pm.test(\"Trae sus fotos\", function () { pm.expect(pm.response.json().datos.fotos).to.be.an(\"array\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "05 Vehículo que no existe (404)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id=999",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "999"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "06 Id inválido (400)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id=abc",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "abc"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "07 Crear sin sesión (401)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"marca\": \"Porsche\",\n    \"modelo\": \"Taycan Turbo S\",\n    \"precio\": 185000,\n    \"categoria\": \"Deportivo alemán\",\n    \"descripcion\": \"Deportivo eléctrico de 750 hp.\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "08 Iniciar sesión (cliente)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/sesion.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "sesion.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"correo\": \"cliente@apexluxury.com\",\n    \"contrasena\": \"Cliente123*\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "09 Crear como cliente (403)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"marca\": \"Porsche\",\n    \"modelo\": \"Taycan Turbo S\",\n    \"precio\": 185000,\n    \"categoria\": \"Deportivo alemán\",\n    \"descripcion\": \"Deportivo eléctrico de 750 hp.\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "10 Cerrar sesión (cliente)",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/sesion.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "sesion.php"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "11 Contraseña incorrecta (401)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/sesion.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "sesion.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"correo\": \"admin@apexluxury.com\",\n    \"contrasena\": \"incorrecta\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "12 Iniciar sesión (admin)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/sesion.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "sesion.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"correo\": \"admin@apexluxury.com\",\n    \"contrasena\": \"Admin123*\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });",
+                            "pm.test(\"Sin contraseña en la respuesta\", function () { pm.expect(pm.response.text()).to.not.include(\"contrasena\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "13 Ver la sesión actual",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/sesion.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "sesion.php"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "14 Crear con datos inválidos (400)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"marca\": \"\",\n    \"precio\": -5,\n    \"estado\": \"usado\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });",
+                            "pm.test(\"Dice qué campos están mal\", function () { pm.expect(pm.response.json().error.campos).to.have.property(\"precio\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "15 Crear sin JSON (415)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/x-www-form-urlencoded"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "marca=Porsche",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 415\", function () { pm.response.to.have.status(415); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "16 Crear vehículo (201)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"marca\": \"Porsche\",\n    \"modelo\": \"Taycan Turbo S\",\n    \"precio\": 185000,\n    \"categoria\": \"Deportivo alemán\",\n    \"descripcion\": \"Deportivo eléctrico de 750 hp.\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });",
+                            "pm.collectionVariables.set(\"nuevoId\", pm.response.json().datos.id);"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "17 Actualizar el vehículo creado",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id={{nuevoId}}",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "{{nuevoId}}"
+                        }
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"precio\": 179900,\n    \"estado\": \"vendido\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });",
+                            "pm.test(\"Guardó el estado nuevo\", function () { pm.expect(pm.response.json().datos.estado).to.eql(\"vendido\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "18 Actualizar sin datos (400)",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id={{nuevoId}}",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "{{nuevoId}}"
+                        }
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "19 Actualizar uno que no existe (404)",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id=999",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "999"
+                        }
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"precio\": 1000\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "20 Método no permitido (405)",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id={{nuevoId}}",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "{{nuevoId}}"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 405\", function () { pm.response.to.have.status(405); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "21 Desactivar el vehículo creado",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id={{nuevoId}}",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "{{nuevoId}}"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });",
+                            "pm.test(\"Quedó inactivo\", function () { pm.expect(pm.response.json().datos.activo).to.eql(false); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "22 Desactivar otra vez (409)",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/vehiculos.php?id={{nuevoId}}",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "vehiculos.php"
+                    ],
+                    "query": [
+                        {
+                            "key": "id",
+                            "value": "{{nuevoId}}"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: false y el código del error\", function () { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.error.codigo).to.be.a(\"string\"); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "23 Cerrar sesión",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base}}/sesion.php",
+                    "host": [
+                        "{{base}}"
+                    ],
+                    "path": [
+                        "sesion.php"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                            "pm.test(\"Responde JSON\", function () { pm.response.to.be.json; });",
+                            "pm.test(\"Trae ok: true\", function () { pm.expect(pm.response.json().ok).to.eql(true); });"
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base",
+            "value": "http://localhost/apex/backend/api"
+        },
+        {
+            "key": "nuevoId",
+            "value": ""
+        }
+    ]
+}

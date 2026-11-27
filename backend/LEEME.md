@@ -90,6 +90,22 @@ Los formularios con archivos (fotos) necesitan `enctype="multipart/form-data"`.
 
 Después de hacer su trabajo, cada proceso guarda un mensaje en `$_SESSION["mensaje"]` y redirige de vuelta a la página que corresponda.
 
+## API (JSON)
+
+Además de los procesos con formularios, el backend tiene una API propia en `backend/api/` que responde en JSON:
+
+| Archivo | Para qué |
+|---|---|
+| `api/vehiculos.php` | Vehículos: consultar la lista o uno (GET), crear (POST), actualizar (PUT) y desactivar (DELETE) |
+| `api/sesion.php` | Iniciar sesión (POST), ver la sesión (GET) y cerrarla (DELETE), para probar la API |
+| `api/respuesta.php` | Funciones comunes: respuestas JSON, errores, lectura del cuerpo y permisos |
+
+Usa las mismas funciones de `funciones/` y la misma sesión del sitio. La pantalla que la consume es el inventario del administrador (`frontend/js/inventario.js`).
+
+La documentación de cada endpoint está en `backend/API.md` y la colección de Postman en `backend/apex_api.postman_collection.json`.
+
+---
+
 ## Filtros del catálogo
 
 El catálogo se filtra por la dirección (método GET): `catalogo.php?marca=...&categoria=...&precio_max=...`.
