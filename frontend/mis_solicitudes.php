@@ -24,8 +24,10 @@ require_once __DIR__ . "/includes/menu.php";
         <p>Todavía no has enviado ninguna solicitud.</p>
         <p><a href="catalogo.php">Ver el catálogo</a></p>
     <?php else: ?>
+        <!-- en el celular la tabla se desliza de lado dentro de este recuadro (tabindex para moverla con el teclado) -->
+        <div class="tabla-desplazable" role="region" aria-labelledby="titulo-tabla" tabindex="0">
         <table>
-            <caption>Solicitudes enviadas</caption>
+            <caption id="titulo-tabla">Solicitudes enviadas</caption>
             <thead>
                 <tr>
                     <th scope="col">Fecha</th>
@@ -45,7 +47,8 @@ require_once __DIR__ . "/includes/menu.php";
                                 <?php echo htmlspecialchars($nombreVehiculo); ?>
                             </a>
                         </td>
-                        <td><?php echo htmlspecialchars(ucfirst($s["estado"])); ?></td>
+                        <!-- la clase solo cambia el color; el estado siempre va escrito -->
+                        <td class="estado-<?php echo htmlspecialchars($s["estado"]); ?>"><?php echo htmlspecialchars(ucfirst($s["estado"])); ?></td>
                         <td>
                             <?php if ($s["comentario"] !== null && $s["comentario"] !== ""): ?>
                                 <?php echo htmlspecialchars($s["comentario"]); ?>
@@ -71,6 +74,8 @@ require_once __DIR__ . "/includes/menu.php";
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
+        <p><a href="catalogo.php">Ver el catálogo</a></p>
     <?php endif; ?>
 </main>
 

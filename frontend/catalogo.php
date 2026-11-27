@@ -25,33 +25,12 @@ $categorias = listarCategorias();
 
 $titulo = "Catálogo";
 
-// AQUÍ VA LA PLANTILLA DE ENZO (encabezado, menú y mensajes):
-// require_once __DIR__ . "/includes/encabezado.php";
-// require_once __DIR__ . "/includes/menu.php";
-
-// TEMPORAL: inicio de la página hecho a mano (de aquí hasta FIN TEMPORAL),
-// se borra cuando esté la plantilla
+// plantilla común: encabezado con el logo, menú según el rol y mensajes
+require_once __DIR__ . "/includes/encabezado.php";
+require_once __DIR__ . "/includes/menu.php";
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Catálogo - Apex Luxury Motors (demo)</title>
-    <!-- estilos de todo el sitio (cuando esté la plantilla, este enlace pasa a encabezado.php) -->
-    <!-- el ?v=2 obliga al navegador a bajar la versión nueva (subir el número cuando cambie el CSS) -->
-    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=6">
-</head>
-<body>
-<!-- FIN TEMPORAL -->
 
 <main>
-    <!-- TEMPORAL: pasa a la plantilla -->
-    <!-- logo arriba a la izquierda, lleva al catálogo (el recorte del fondo negro está en estilos.css) -->
-    <a class="logo" href="catalogo.php">
-        <img src="/apex/img/logo_apex.png" alt="Apex Luxury Motors (demo)" width="2752" height="1536">
-    </a>
-
     <h1>Catálogo de vehículos</h1>
 
     <!-- Buscar vehículos: el formulario manda los filtros por la dirección -->
@@ -140,10 +119,4 @@ $titulo = "Catálogo";
     </section>
 </main>
 
-<?php
-// AQUÍ VA EL PIE DE LA PLANTILLA DE ENZO:
-// require_once __DIR__ . "/includes/pie.php";
-?>
-<!-- TEMPORAL: cierre de la página hecho a mano, se borra cuando esté la plantilla -->
-</body>
-</html>
+<?php require_once __DIR__ . "/includes/pie.php"; ?>
