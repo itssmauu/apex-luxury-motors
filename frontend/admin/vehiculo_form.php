@@ -34,6 +34,9 @@ if ($id > 0) {
 
 $categorias = listarCategorias();
 
+// fotos actuales (solo existen al editar)
+$fotos = ($id > 0) ? listarFotosVehiculo($id) : [];
+
 $tituloPagina = ($id > 0) ? "Editar vehículo" : "Agregar vehículo";
 $titulo = $tituloPagina;
 
@@ -67,16 +70,16 @@ require_once __DIR__ . "/../includes/menu.php";
 
         <p>
             <label for="categoria">Categoría</label><br>
-                <select id="categoria" name="categoria" required>
-                    <option value="">Selecciona una categoría</option>
-                    <?php foreach ($categorias as $c): ?>
-                        <?php $nombreCategoria = is_array($c) ? reset($c) : $c; ?>
-                        <option value="<?php echo htmlspecialchars($nombreCategoria); ?>"
-                            <?php echo ($nombreCategoria === $vehiculo["categoria"]) ? "selected" : ""; ?>>
-                            <?php echo htmlspecialchars($nombreCategoria); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+            <select id="categoria" name="categoria" required>
+                <option value="">Selecciona una categoría</option>
+                <?php foreach ($categorias as $c): ?>
+                    <?php $nombreCategoria = is_array($c) ? reset($c) : $c; ?>
+                    <option value="<?php echo htmlspecialchars($nombreCategoria); ?>"
+                        <?php echo ($nombreCategoria === $vehiculo["categoria"]) ? "selected" : ""; ?>>
+                        <?php echo htmlspecialchars($nombreCategoria); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         </p>
 
         <p>
@@ -99,6 +102,35 @@ require_once __DIR__ . "/../includes/menu.php";
             <a href="/apex/frontend/admin/vehiculos.php">Cancelar</a>
         </p>
     </form>
+
+    <?php if ($id > 0): ?>
+        <h2>Fotos</h2>
+
+        <?php if (count($fotos) === 0): ?>
+            <p>Este vehículo no tiene fotos.</p>
+        <?php else: ?>
+            <ul>
+                <?php foreach ($fotos as $f): ?>
+                    <li>
+                        <img src="/apex/<?php echo htmlspecialchars($f["ruta"]); ?>"
+                             alt="Foto <?php echo (int) $f["orden"]; ?> de <?php echo htmlspecialchars($vehiculo["marca"] . " " . $vehiculo["modelo"]); ?>"
+                             width="160" height="107">
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
+        <form method="post" action="/apex/backend/procesos/vehiculo_foto_subir.php" enctype="multipart/form-data">
+            <input type="hidden" name="vehiculo_id" value="<?php echo $id; ?>">
+
+            <p>
+                <label for="foto">Agregar foto (JPG, PNG o WEBP, máximo 5 MB)</label><br>
+                <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp" required>
+            </p>
+
+            <p><button type="submit">Subir foto</button></p>
+        </form>
+    <?php endif; ?>
 </main>
 
 <?php require_once __DIR__ . "/../includes/pie.php"; ?>
