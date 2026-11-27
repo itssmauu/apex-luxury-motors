@@ -373,12 +373,13 @@ footer nav a:hover {
     margin-bottom: var(--e1);
 }
 
-/* barra final: línea fina arriba y texto más chico */
+/* barra final: de borde a borde (sale del relleno del pie) y un tono más claro.
+   Copyright y cookies a la izquierda, idioma a la derecha (ver bloque IDIOMAS al final) */
 .pie-legal {
-    max-width: 2200px;
-    margin: var(--e4) auto 0;
-    padding-top: var(--e2);
+    margin: var(--e4) calc(-1 * clamp(16px, 2vw, 32px)) calc(-1 * var(--e3));
+    padding: var(--e3) clamp(16px, 2vw, 32px);
     border-top: 1px solid var(--linea);
+    background: var(--tarjeta);
     font-size: 0.75rem;
 }
 
@@ -4837,5 +4838,207 @@ main > .gama-grupo:last-of-type,
 @media (prefers-reduced-motion: reduce) {
     .motor.encendido {
         animation: none;
+    }
+}
+
+/* =====================================================================
+   IDIOMAS Y COOKIES (includes/pie.php)
+   Barra inferior del pie con el selector de idioma (se abre hacia arriba)
+   y el aviso de cookies. Solo usa los colores de la paleta (:root)
+   ===================================================================== */
+
+/* barra inferior: copyright y cookies a la izquierda, idioma a la derecha */
+.pie-legal-contenido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--e2) var(--e4);
+    max-width: 2200px;
+    margin: 0 auto;
+}
+
+.pie-legal-texto {
+    min-width: 0;
+}
+
+/* "Preferencias de cookies": es un botón (manda un formulario) pero se ve como enlace */
+.pie-form-cookies {
+    display: inline;
+}
+
+.pie-boton-enlace {
+    height: auto;
+    min-height: 32px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--dorado);
+    font-size: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.pie-boton-enlace:hover {
+    background: none;
+    color: var(--dorado-claro);
+}
+
+/* selector de idioma: el idioma actual en mayúsculas con una flecha */
+.pie-idioma {
+    position: relative;
+    flex: none;
+}
+
+.pie-idioma summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e1);
+    min-height: 44px;
+    padding: 0 var(--e2);
+    border: 1px solid var(--borde-campo);
+    border-radius: 4px;
+    color: var(--hueso);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    list-style: none;
+    cursor: pointer;
+}
+
+/* sin el triángulo que el navegador pone en los details */
+.pie-idioma summary::-webkit-details-marker {
+    display: none;
+}
+
+.pie-idioma summary:hover {
+    border-color: var(--hueso);
+}
+
+.pie-idioma summary:focus-visible {
+    outline: 3px solid var(--dorado);
+    outline-offset: 2px;
+}
+
+/* la flecha apunta hacia arriba (por ahí se abre el panel) y gira al abrir */
+.pie-idioma-flecha {
+    display: inline-block;
+    transition: transform 160ms var(--curva);
+}
+
+.pie-idioma[open] .pie-idioma-flecha {
+    transform: rotate(180deg);
+}
+
+/* panel con los 4 idiomas, encima del botón */
+.pie-idioma-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + var(--e1));
+    z-index: 30;
+    min-width: 200px;
+    margin: 0;
+    padding: var(--e1);
+    list-style: none;
+    border: 1px solid var(--linea);
+    border-radius: 4px;
+    background: var(--campo);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.pie-idioma-panel button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--e2);
+    width: 100%;
+    height: auto;
+    min-height: 44px;
+    padding: 0 var(--e2);
+    background: transparent;
+    color: var(--hueso);
+    font-weight: 400;
+    text-align: left;
+}
+
+.pie-idioma-panel button:hover {
+    background: var(--tarjeta);
+}
+
+/* el idioma actual: dorado y con una marca (aria-current lo dice al lector) */
+.pie-idioma-panel button[aria-current="true"] {
+    color: var(--dorado);
+    font-weight: 600;
+}
+
+/* aviso de cookies: tarjeta fija abajo a la derecha (a la izquierda están el texto
+   y el botón principal de la portada), no bloquea la página.
+   z-index 50: encima de la barra del modelo (20) y debajo de la intro de la portada (100) */
+.aviso-cookies {
+    position: fixed;
+    right: clamp(16px, 2vw, 32px);
+    bottom: clamp(16px, 2vw, 32px);
+    z-index: 50;
+    width: min(440px, 100% - 32px);
+    padding: var(--e3);
+    border: 1px solid var(--linea);
+    border-radius: 4px;
+    background: var(--tarjeta);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    color: var(--hueso);
+    font-size: 0.9375rem;
+}
+
+.aviso-cookies p {
+    margin: 0 0 var(--e2);
+}
+
+/* Aceptar y Rechazar: mismo tamaño y mismo estilo, sin preferir ninguno */
+.aviso-cookies-botones {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--e2);
+}
+
+.aviso-cookies-boton {
+    width: 100%;
+    height: 44px;
+    padding: 0 var(--e2);
+    border: 1px solid var(--hueso);
+    background: transparent;
+    color: var(--hueso);
+}
+
+.aviso-cookies-boton:hover {
+    background: var(--campo);
+}
+
+/* mientras se ve el aviso, la barra inferior deja espacio abajo
+   para que el aviso no tape el texto ni el selector de idioma */
+.con-aviso-cookies .pie-legal {
+    padding-bottom: 240px;        /* alto del aviso (~180 px) + su distancia al borde + aire */
+}
+
+/* celular: la barra se apila (texto arriba, idioma abajo) y el aviso va a todo el ancho */
+@media (max-width: 599px) {
+    .pie-legal-contenido {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pie-idioma-panel {
+        right: auto;
+        left: 0;
+    }
+
+    .aviso-cookies {
+        right: 16px;
+        left: 16px;
+        bottom: 16px;
+        width: auto;
+    }
+
+    .con-aviso-cookies .pie-legal {
+        padding-bottom: 260px;    /* en el celular el aviso es más alto */
     }
 }

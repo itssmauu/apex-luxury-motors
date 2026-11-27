@@ -42,7 +42,10 @@
 
     var dibujarBoton = function () {
         boton.classList.toggle("en-pausa", enPausa);
-        boton.setAttribute("aria-label", enPausa ? "Reproducir destacados" : "Pausar destacados");
+        // los textos traducidos vienen de PHP (data-texto-*); el español queda de respaldo
+        boton.setAttribute("aria-label", enPausa
+            ? (boton.dataset.textoReproducir || "Reproducir destacados")
+            : (boton.dataset.textoPausar || "Pausar destacados"));
     };
 
     boton.hidden = false;

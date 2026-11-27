@@ -1,6 +1,8 @@
 <?php
 // Cifras cortas de las especificaciones, para mostrarlas en grande.
 // Las usan la página del vehículo (escena "Rendimiento") y el catálogo (cada tarjeta).
+// Las cifras se sacan del texto en español y los nombres salen del diccionario (t).
+require_once __DIR__ . "/idioma.php";
 
 // devuelve el dato si existe y no dice "No disponible"
 function datoFicha($ficha, $nombre)
@@ -23,6 +25,18 @@ function cifraCorta($texto, $patrones)
     return "";
 }
 
+// la cifra corta se saca del texto en español; aquí solo se traduce el "Más de" / "Menos de" del inicio
+function cifraTraducida($cifra)
+{
+    if (strpos($cifra, "Más de ") === 0) {
+        return t("cifra.mas_de", substr($cifra, strlen("Más de ")));
+    }
+    if (strpos($cifra, "Menos de ") === 0) {
+        return t("cifra.menos_de", substr($cifra, strlen("Menos de ")));
+    }
+    return $cifra;
+}
+
 // las cifras de un vehículo (solo las que tienen dato), en este orden:
 // potencia, aceleración, velocidad máxima y torque.
 // "nombre" es el texto largo y "corto" el de las tarjetas del catálogo.
@@ -32,7 +46,7 @@ function cifrasDestacadas($ficha)
 
     $potencia = cifraCorta(datoFicha($ficha, "Potencia"), ["(?:PS|CV|bhp|hp)\b", "kW\b"]);
     if ($potencia !== "") {
-        $cifras[] = ["valor" => $potencia, "nombre" => "Potencia máxima", "corto" => "Potencia"];
+        $cifras[] = ["valor" => cifraTraducida($potencia), "nombre" => t("cifra.potencia"), "corto" => t("cifra.potencia_corta")];
     }
 
     $aceleracionTexto = datoFicha($ficha, "Aceleración");
@@ -40,17 +54,17 @@ function cifrasDestacadas($ficha)
     if ($aceleracion !== "") {
         // la fuente da la cifra de 0 a 60 mph o de 0 a 100 km/h: se dice cuál es
         $tramo = (strpos($aceleracionTexto, "0–60") !== false) ? "0–60 mph" : "0–100 km/h";
-        $cifras[] = ["valor" => $aceleracion, "nombre" => "Aceleración " . $tramo, "corto" => $tramo];
+        $cifras[] = ["valor" => cifraTraducida($aceleracion), "nombre" => t("cifra.aceleracion", $tramo), "corto" => $tramo];
     }
 
     $velocidad = cifraCorta(datoFicha($ficha, "Velocidad máxima"), ["km\/h"]);
     if ($velocidad !== "") {
-        $cifras[] = ["valor" => $velocidad, "nombre" => "Velocidad máxima", "corto" => "Velocidad máxima"];
+        $cifras[] = ["valor" => cifraTraducida($velocidad), "nombre" => t("cifra.velocidad"), "corto" => t("cifra.velocidad")];
     }
 
     $torque = cifraCorta(datoFicha($ficha, "Torque"), ["N·m"]);
     if ($torque !== "") {
-        $cifras[] = ["valor" => $torque, "nombre" => "Torque máximo", "corto" => "Torque"];
+        $cifras[] = ["valor" => cifraTraducida($torque), "nombre" => t("cifra.torque"), "corto" => t("cifra.torque_corto")];
     }
 
     return $cifras;

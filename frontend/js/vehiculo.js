@@ -99,7 +99,10 @@
         var dibujarBoton = function () {
             var enPausa = video.paused;
             boton.classList.toggle("en-pausa", enPausa);
-            boton.setAttribute("aria-label", enPausa ? "Reproducir video" : "Pausar video");
+            // los textos traducidos vienen de PHP (data-texto-*); el español queda de respaldo
+            boton.setAttribute("aria-label", enPausa
+                ? (boton.dataset.textoReproducir || "Reproducir video")
+                : (boton.dataset.textoPausar || "Pausar video"));
         };
 
         boton.hidden = false;

@@ -11,6 +11,11 @@ require_once __DIR__ . "/../backend/funciones/vehiculos.php";
 // especificaciones (no están en la base) y las funciones para sacar cifras cortas
 require_once __DIR__ . "/datos/especificaciones.php";
 require_once __DIR__ . "/includes/cifras.php";
+// textos traducidos (t), nombres de categorías, descripciones y ficha en el idioma elegido
+require_once __DIR__ . "/includes/idioma.php";
+require_once __DIR__ . "/datos/valores.php";
+require_once __DIR__ . "/datos/descripciones.php";
+require_once __DIR__ . "/datos/especificaciones_traducciones.php";
 
 // leemos los filtros de la dirección (catalogo.php?marca=...&categoria=...&precio_max=...)
 // si no vienen o vienen raros, quedan vacíos
@@ -101,12 +106,13 @@ uksort($grupos, function ($a, $b) {
     return strcmp($a, $b);
 });
 
-// una línea que presenta cada categoría (si hay una nueva sin texto, no se muestra nada)
+// una línea que presenta cada categoría (si hay una nueva sin texto, no se muestra nada).
+// El texto sale del diccionario: catalogo.desc.superdeportivo, catalogo.desc.aleman...
 $descripcionesCategoria = [
-    "Superdeportivo"           => "Los más rápidos y exclusivos del catálogo.",
-    "Deportivo alemán"         => "Ingeniería alemana para el día a día y para la pista.",
-    "Deportivo japonés"        => "Leyendas japonesas del turbo y la tracción integral.",
-    "Deportivo estadounidense" => "V8 americano con carácter propio.",
+    "Superdeportivo"           => "catalogo.desc.superdeportivo",
+    "Deportivo alemán"         => "catalogo.desc.aleman",
+    "Deportivo japonés"        => "catalogo.desc.japones",
+    "Deportivo estadounidense" => "catalogo.desc.estadounidense",
 ];
 
 // ---------- destacados de arriba: los 3 más caros que siguen disponibles ----------
@@ -134,7 +140,7 @@ function enlaceCategoria($nuevaCategoria, $marca, $precioMax)
     return "catalogo.php" . (count($parametros) > 0 ? "?" . http_build_query($parametros) : "");
 }
 
-$titulo = "Catálogo";
+$titulo = t("menu.catalogo");
 // el logo y el menú van encima de las fotos de arriba
 $claseBody = "pagina-catalogo";
 
@@ -155,7 +161,7 @@ require_once __DIR__ . "/includes/menu.php";
                          <?php echo ($n === 0) ? 'fetchpriority="high"' : 'loading="lazy"'; ?>>
                 <?php endif; ?>
                 <p class="gama-destacado">
-                    <span>Destacado</span>
+                    <span><?php echo htmlspecialchars(t("catalogo.destacado")); ?></span>
                     <a href="vehiculo.php?id=<?php echo (int) $d["id"]; ?>" <?php if ($n > 0) { echo 'tabindex="-1"'; } ?>>
                         <?php echo htmlspecialchars($d["marca"] . " " . $d["modelo"]); ?> <span aria-hidden="true">→</span>
                     </a>
@@ -164,18 +170,21 @@ require_once __DIR__ . "/includes/menu.php";
         <?php endforeach; ?>
 
         <div class="gama-portada-texto">
-            <p class="sobretitulo">Catálogo</p>
-            <h1 id="titulo-catalogo" class="gama-titulo">Nuestra gama</h1>
+            <p class="sobretitulo"><?php echo htmlspecialchars(t("menu.catalogo")); ?></p>
+            <h1 id="titulo-catalogo" class="gama-titulo"><?php echo htmlspecialchars(t("catalogo.gama")); ?></h1>
             <p class="gama-conteo">
-                <?php echo count($vehiculos); ?>
-                <?php echo (count($vehiculos) === 1) ? "modelo" : "modelos"; ?>
-                <?php if ($hayFiltros) { echo "con estos filtros"; } else { echo "nuevos, con cero kilómetros"; } ?>
+                <?php echo htmlspecialchars(tPlural(count($vehiculos), "plural.modelo.uno", "plural.modelo.varios")); ?>
+                <?php echo htmlspecialchars($hayFiltros ? t("catalogo.con_filtros") : t("catalogo.cero_km")); ?>
             </p>
         </div>
 
         <!-- pausa del cambio de destacados (el JavaScript le quita el hidden) -->
         <?php if (count($destacados) > 1): ?>
-            <button type="button" class="boton-pausa gama-pausa" aria-label="Pausar destacados" hidden>
+            <!-- data-texto-*: los textos traducidos que usa catalogo.js -->
+            <button type="button" class="boton-pausa gama-pausa"
+                    aria-label="<?php echo htmlspecialchars(t("catalogo.pausar_destacados")); ?>"
+                    data-texto-pausar="<?php echo htmlspecialchars(t("catalogo.pausar_destacados")); ?>"
+                    data-texto-reproducir="<?php echo htmlspecialchars(t("catalogo.reproducir_destacados")); ?>" hidden>
                 <span class="icono-pausa" aria-hidden="true"></span>
             </button>
         <?php endif; ?>
@@ -183,19 +192,19 @@ require_once __DIR__ . "/includes/menu.php";
 
     <!-- ===== 2. filtros: pestañas de categoría y una barra con marca y precio ===== -->
     <section class="gama-filtros" aria-labelledby="titulo-filtros">
-        <h2 id="titulo-filtros" class="solo-lector">Buscar vehículos</h2>
+        <h2 id="titulo-filtros" class="solo-lector"><?php echo htmlspecialchars(t("catalogo.buscar_titulo")); ?></h2>
 
-        <nav class="gama-pestanas" aria-label="Categorías">
+        <nav class="gama-pestanas" aria-label="<?php echo htmlspecialchars(t("catalogo.categorias")); ?>">
             <ul>
                 <li>
                     <a href="<?php echo htmlspecialchars(enlaceCategoria("", $marca, $precioMax)); ?>"
-                       <?php if ($categoria === "") { echo 'aria-current="page"'; } ?>>Todos</a>
+                       <?php if ($categoria === "") { echo 'aria-current="page"'; } ?>><?php echo htmlspecialchars(t("catalogo.todos")); ?></a>
                 </li>
                 <?php foreach ($categorias as $fila): ?>
                     <li>
                         <a href="<?php echo htmlspecialchars(enlaceCategoria($fila["categoria"], $marca, $precioMax)); ?>"
                            <?php if ($fila["categoria"] === $categoria) { echo 'aria-current="page"'; } ?>>
-                            <?php echo htmlspecialchars($fila["categoria"]); ?>
+                            <?php echo htmlspecialchars(nombreCategoria($fila["categoria"])); ?>
                         </a>
                     </li>
                 <?php endforeach; ?>
@@ -209,9 +218,9 @@ require_once __DIR__ . "/includes/menu.php";
             <?php endif; ?>
 
             <label>
-                Marca
+                <?php echo htmlspecialchars(t("dato.marca")); ?>
                 <select name="marca">
-                    <option value="">Todas</option>
+                    <option value=""><?php echo htmlspecialchars(t("catalogo.todas")); ?></option>
                     <?php foreach ($marcas as $fila): ?>
                         <option value="<?php echo htmlspecialchars($fila["marca"]); ?>"
                             <?php if ($fila["marca"] === $marca) { echo "selected"; } ?>>
@@ -222,15 +231,15 @@ require_once __DIR__ . "/includes/menu.php";
             </label>
 
             <label>
-                Precio máximo (USD)
+                <?php echo htmlspecialchars(t("catalogo.precio_max")); ?>
                 <!-- autocomplete off: que el navegador no sugiera precios viejos -->
                 <input type="number" name="precio_max" min="1" step="1" autocomplete="off"
                        value="<?php echo htmlspecialchars($precioMax); ?>">
             </label>
 
-            <button type="submit">Buscar</button>
+            <button type="submit"><?php echo htmlspecialchars(t("catalogo.buscar")); ?></button>
             <?php if ($hayFiltros): ?>
-                <a class="gama-quitar" href="catalogo.php">Quitar filtros</a>
+                <a class="gama-quitar" href="catalogo.php"><?php echo htmlspecialchars(t("catalogo.quitar_filtros")); ?></a>
             <?php endif; ?>
         </form>
     </section>
@@ -239,10 +248,10 @@ require_once __DIR__ . "/includes/menu.php";
     <?php if (count($vehiculos) === 0): ?>
         <section class="gama-vacio">
             <?php if ($hayFiltros): ?>
-                <p>No encontramos vehículos con esos filtros.</p>
-                <p><a href="catalogo.php">Quitar filtros</a> para ver todo el catálogo.</p>
+                <p><?php echo htmlspecialchars(t("catalogo.sin_resultados")); ?></p>
+                <p><a href="catalogo.php"><?php echo htmlspecialchars(t("catalogo.quitar_filtros")); ?></a> <?php echo htmlspecialchars(t("catalogo.para_ver_todo")); ?></p>
             <?php else: ?>
-                <p>Por ahora no hay vehículos en el catálogo.</p>
+                <p><?php echo htmlspecialchars(t("catalogo.vacio")); ?></p>
             <?php endif; ?>
         </section>
     <?php else: ?>
@@ -251,10 +260,10 @@ require_once __DIR__ . "/includes/menu.php";
             <?php $numeroGrupo++; $idGrupo = "grupo-" . $numeroGrupo; ?>
             <section class="gama-grupo" aria-labelledby="<?php echo $idGrupo; ?>">
                 <div class="gama-grupo-cabecera revelar">
-                    <h2 id="<?php echo $idGrupo; ?>"><?php echo htmlspecialchars($nombreGrupo); ?></h2>
+                    <h2 id="<?php echo $idGrupo; ?>"><?php echo htmlspecialchars(nombreCategoria($nombreGrupo)); ?></h2>
                     <p>
-                        <?php if (isset($descripcionesCategoria[$nombreGrupo])) { echo htmlspecialchars($descripcionesCategoria[$nombreGrupo]) . " · "; } ?>
-                        <?php echo count($autos); ?> <?php echo (count($autos) === 1) ? "modelo" : "modelos"; ?>
+                        <?php if (isset($descripcionesCategoria[$nombreGrupo])) { echo htmlspecialchars(t($descripcionesCategoria[$nombreGrupo])) . " · "; } ?>
+                        <?php echo htmlspecialchars(tPlural(count($autos), "plural.modelo.uno", "plural.modelo.varios")); ?>
                     </p>
                 </div>
 
@@ -266,7 +275,8 @@ require_once __DIR__ . "/includes/menu.php";
                         $ficha = $especificaciones[(int) $v["id"]] ?? [];
                         // en la tarjeta van 3 cifras: potencia, aceleración y velocidad (o torque si falta alguna)
                         $cifrasAuto = array_slice(cifrasDestacadas($ficha), 0, 3);
-                        $traccion = datoFicha($ficha, "Tracción");
+                        // la tracción se lee en español y se muestra traducida
+                        $traccion = datoFichaTraducido((int) $v["id"], "Tracción", datoFicha($ficha, "Tracción"));
                         $vendido = ($v["estado"] === "vendido");
                         $medios = mediosDelAuto((int) $v["id"]);
                         ?>
@@ -285,14 +295,14 @@ require_once __DIR__ . "/includes/menu.php";
                                              width="800" height="500" loading="lazy">
                                     <?php endif; ?>
                                 <?php else: ?>
-                                    <span class="sin-foto">Foto no disponible</span>
+                                    <span class="sin-foto"><?php echo htmlspecialchars(t("comun.foto_no_disponible")); ?></span>
                                 <?php endif; ?>
                             </a>
 
                             <?php if ($medios["sonido"] !== ""): ?>
                                 <!-- botón de encendido: suena el motor de este auto (lo activa el JavaScript) -->
                                 <button type="button" class="motor" data-sonido="<?php echo htmlspecialchars($medios["sonido"]); ?>"
-                                        aria-pressed="false" aria-label="Encender el motor del <?php echo htmlspecialchars($nombreAuto); ?>" hidden>
+                                        aria-pressed="false" aria-label="<?php echo htmlspecialchars(t("motor.encender_aria", $nombreAuto)); ?>" hidden>
                                     <span class="motor-icono" aria-hidden="true"></span>
                                     <span class="motor-texto" aria-hidden="true">Engine<br>Start</span>
                                 </button>
@@ -301,15 +311,20 @@ require_once __DIR__ . "/includes/menu.php";
 
                             <div class="modelo-tarjeta-cuerpo">
                                 <!-- etiquetas: estado, tracción y cuántas vistas tiene -->
-                                <ul class="modelo-etiquetas" aria-label="Datos rápidos">
+                                <ul class="modelo-etiquetas" aria-label="<?php echo htmlspecialchars(t("catalogo.datos_rapidos")); ?>">
                                     <li class="<?php echo $vendido ? "etiqueta-vendido" : "etiqueta-disponible"; ?>">
-                                        <?php echo $vendido ? "Vendido" : "Disponible"; ?>
+                                        <?php echo htmlspecialchars($vendido ? t("estado_vehiculo.vendido") : t("estado_vehiculo.disponible")); ?>
                                     </li>
                                     <?php if ($traccion !== ""): ?>
-                                        <li>Tracción <?php echo htmlspecialchars(mb_strtolower($traccion)); ?></li>
+                                        <?php
+                                        // "Tracción integral": el valor en minúscula dentro del texto y la primera letra en mayúscula
+                                        $etiquetaTraccion = t("catalogo.traccion", mb_strtolower($traccion));
+                                        $etiquetaTraccion = mb_strtoupper(mb_substr($etiquetaTraccion, 0, 1)) . mb_substr($etiquetaTraccion, 1);
+                                        ?>
+                                        <li><?php echo htmlspecialchars($etiquetaTraccion); ?></li>
                                     <?php endif; ?>
                                     <?php if ($fotosAuto["cantidad"] > 1): ?>
-                                        <li><?php echo $fotosAuto["cantidad"]; ?> vistas</li>
+                                        <li><?php echo htmlspecialchars(t("catalogo.n_vistas", $fotosAuto["cantidad"])); ?></li>
                                     <?php endif; ?>
                                 </ul>
 
@@ -317,7 +332,7 @@ require_once __DIR__ . "/includes/menu.php";
                                     <span class="modelo-tarjeta-marca"><?php echo htmlspecialchars($v["marca"]); ?></span>
                                     <?php echo htmlspecialchars($v["modelo"]); ?>
                                 </h3>
-                                <p class="modelo-tarjeta-linea"><?php echo htmlspecialchars(primeraOracion($v["descripcion"])); ?></p>
+                                <p class="modelo-tarjeta-linea"><?php echo htmlspecialchars(primeraOracion(descripcionVehiculo($v["id"], $v["descripcion"]))); ?></p>
 
                                 <?php if (count($cifrasAuto) > 0): ?>
                                     <!-- número grande arriba y su nombre abajo -->
@@ -337,14 +352,14 @@ require_once __DIR__ . "/includes/menu.php";
                                     </p>
                                     <div class="modelo-tarjeta-botones">
                                         <a class="boton" href="vehiculo.php?id=<?php echo (int) $v["id"]; ?>"
-                                           aria-label="Explorar <?php echo htmlspecialchars($nombreAuto); ?>">Explorar</a>
+                                           aria-label="<?php echo htmlspecialchars(t("catalogo.explorar_aria", $nombreAuto)); ?>"><?php echo htmlspecialchars(t("catalogo.explorar")); ?></a>
                                         <?php if ($medios["modelo"] !== ""): ?>
                                             <!-- tiene modelo 3D: lleva directo a esa sección de su página -->
                                             <a class="boton-linea" href="vehiculo.php?id=<?php echo (int) $v["id"]; ?>#modelo-3d"
-                                               aria-label="Ver el <?php echo htmlspecialchars($nombreAuto); ?> en 3D">Ver en 3D</a>
+                                               aria-label="<?php echo htmlspecialchars(t("catalogo.ver_3d_aria", $nombreAuto)); ?>"><?php echo htmlspecialchars(t("catalogo.ver_3d")); ?></a>
                                         <?php elseif ($fotosAuto["cantidad"] > 1): ?>
                                             <a class="boton-linea" href="vehiculo.php?id=<?php echo (int) $v["id"]; ?>#vistas"
-                                               aria-label="Ver las vistas del <?php echo htmlspecialchars($nombreAuto); ?>">Ver vistas</a>
+                                               aria-label="<?php echo htmlspecialchars(t("catalogo.ver_vistas_aria", $nombreAuto)); ?>"><?php echo htmlspecialchars(t("catalogo.ver_vistas")); ?></a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -358,7 +373,7 @@ require_once __DIR__ . "/includes/menu.php";
 </main>
 
 <!-- destacados de arriba y botón de encendido del motor -->
-<script src="/apex/frontend/js/catalogo.js?v=3"></script>
+<script src="/apex/frontend/js/catalogo.js?v=4"></script>
 <script src="/apex/frontend/js/motor.js?v=1"></script>
 
 <?php require_once __DIR__ . "/includes/pie.php"; ?>

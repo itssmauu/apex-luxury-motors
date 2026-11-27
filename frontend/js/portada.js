@@ -22,7 +22,9 @@
     // cambia el ícono y el texto de un botón de pausa
     function marcarBoton(boton, enPausa, queControla) {
         boton.classList.toggle("en-pausa", enPausa);
-        boton.setAttribute("aria-label", (enPausa ? "Reproducir " : "Pausar ") + queControla);
+        // los textos traducidos los pone PHP en data-texto-reproducir y data-texto-pausar
+        var texto = enPausa ? boton.dataset.textoReproducir : boton.dataset.textoPausar;
+        boton.setAttribute("aria-label", texto || ((enPausa ? "Reproducir " : "Pausar ") + queControla));
     }
 
     // ---------- carrusel ----------
