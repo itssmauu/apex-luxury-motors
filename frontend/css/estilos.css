@@ -204,31 +204,22 @@ button:disabled {
 }
 
 /* ---------- plantilla: encabezado, menú, avisos y pie ---------- */
-/* el logo va centrado arriba en todas las páginas.
-   La imagen tiene fondo negro y el nombre ocupa solo el centro,
-   así que se recorta y se "funde" con el fondo de la página */
+/* el logo va centrado arriba en todas las páginas
+   (PNG con fondo transparente, así sirve sobre cualquier fondo) */
 header {
     padding: var(--e3) clamp(16px, 2vw, 32px) 0;
 }
 
 .logo {
     display: block;
-    position: relative;
-    width: 276px;
-    height: 136px;                /* el nombre queda de unos 260 px de ancho */
-    overflow: hidden;
-    border-radius: 4px;
+    width: 240px;
     margin: 0 auto;
 }
 
 .logo img {
-    position: absolute;
-    left: -91px;
-    top: -59px;
-    width: 460px;
-    max-width: none;
+    display: block;
+    width: 100%;
     height: auto;
-    mix-blend-mode: lighten;      /* el negro de la imagen toma el color del fondo */
 }
 
 /* menú: horizontal y centrado debajo del logo; en el celular baja de línea, no se sale */
@@ -392,23 +383,6 @@ main > form h2 {
     gap: var(--e1) var(--e3);
 }
 
-/* ---------- portada (index) ---------- */
-.portada {
-    max-width: 760px;
-    padding-top: clamp(48px, 12vh, 140px);
-    text-align: center;
-}
-
-.portada h1 {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    margin-bottom: var(--e3);
-}
-
-.portada p {
-    font-size: 1.25rem;
-    color: var(--gris-claro);
-    margin: 0 0 var(--e4);
-}
 
 /* enlace que se ve como botón dorado ("Ver el catálogo") */
 .boton {
@@ -1006,5 +980,681 @@ p.vendido {
     /* la flecha de "Volver al catálogo" no se mueve */
     .volver:hover .flecha {
         transform: none;
+    }
+}
+
+/* =====================================================================
+   PORTADA (index.php)
+   Idea: como las páginas de las marcas de lujo. Video a pantalla
+   completa con el menú encima, títulos grandes en mayúsculas y
+   secciones con mucho aire. Todo usa los mismos colores de arriba.
+   ===================================================================== */
+
+/* texto solo para lectores de pantalla (el h1 de la portada) */
+.solo-lector {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------- menú encima del video ----------
+   El body se vuelve una cuadrícula: logo, menú y aviso van en las filas 1 a 3,
+   y el contenido (main) ocupa las filas 1 a 4, así queda debajo de ellos */
+.pagina-inicio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr auto;
+}
+
+.pagina-inicio > header,
+.pagina-inicio > nav,
+.pagina-inicio > .mensaje {
+    grid-column: 1;
+    position: relative;
+    z-index: 2;                   /* por encima del video */
+}
+
+.pagina-inicio > header { grid-row: 1; }
+.pagina-inicio > nav { grid-row: 2; }
+.pagina-inicio > .mensaje { grid-row: 3; align-self: start; }
+
+.pagina-inicio > main {
+    grid-column: 1;
+    grid-row: 1 / 5;
+    max-width: none;
+    padding: 0;
+}
+
+.pagina-inicio > footer {
+    grid-column: 1;
+    grid-row: 5;
+}
+
+/* sobre el video, la línea del menú es blanca suave */
+.pagina-inicio > nav {
+    border-bottom-color: rgba(255, 255, 255, 0.18);
+}
+
+.pagina-inicio > nav a {
+    color: #ffffff;
+}
+
+.pagina-inicio > nav li {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* ---------- intro: el logo sobre negro ---------- */
+.intro {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    background: #000000;
+    cursor: pointer;
+    animation: intro-salida 700ms var(--curva) 2300ms forwards;
+}
+
+/* al hacer clic o tocar una tecla se va más rápido */
+.intro.intro-fuera {
+    animation: intro-salida 350ms var(--curva) forwards;
+}
+
+.intro-marca {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--e3);
+    animation: intro-acercar 2600ms var(--curva) forwards;
+}
+
+/* el logo se "dibuja" de izquierda a derecha */
+.intro-marca img {
+    display: block;
+    width: min(560px, 72vw);
+    height: auto;
+    clip-path: inset(0 100% 0 0);
+    animation: intro-trazo 1300ms cubic-bezier(0.65, 0, 0.35, 1) 250ms forwards;
+}
+
+/* una línea dorada crece debajo */
+.intro-linea {
+    display: block;
+    width: min(220px, 30vw);
+    height: 1px;
+    background: var(--dorado);
+    transform: scaleX(0);
+    animation: intro-linea 800ms var(--curva) 1100ms forwards;
+}
+
+@keyframes intro-trazo {
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes intro-linea {
+    to { transform: scaleX(1); }
+}
+
+@keyframes intro-acercar {
+    from { transform: scale(0.96); }
+    to { transform: scale(1); }
+}
+
+@keyframes intro-salida {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* ---------- carrusel de videos ---------- */
+.hero {
+    position: relative;
+    height: 100vh;
+    height: 100svh;               /* en el celular no queda tapado por la barra del navegador */
+    min-height: 620px;
+    overflow: hidden;
+    background: #000000;
+    color: #ffffff;
+}
+
+/* sombra arriba para que el logo y el menú se lean sobre cualquier video */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 340px;
+    z-index: 1;
+    background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    pointer-events: none;
+}
+
+/* todas las diapositivas una encima de otra; solo la activa se ve.
+   visibility hidden saca del teclado y del lector a las que no se ven */
+.hero-diapositiva {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 900ms var(--curva), visibility 0s linear 900ms;
+}
+
+.hero-diapositiva.activa {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 900ms var(--curva), visibility 0s;
+}
+
+/* sombra abajo y a la izquierda para que el texto se lea aunque el video sea claro */
+.hero-diapositiva::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0.55) 60%, rgba(0, 0, 0, 0.9)),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 60%);
+    pointer-events: none;
+}
+
+.hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;            /* llena la pantalla sin deformarse */
+}
+
+/* el texto abajo a la izquierda, sobre los indicadores */
+.hero-texto {
+    position: absolute;
+    z-index: 2;
+    left: clamp(16px, 5vw, 96px);
+    right: clamp(16px, 5vw, 96px);
+    bottom: calc(clamp(24px, 4vh, 40px) + 88px);
+    max-width: 960px;
+}
+
+.hero-etiqueta {
+    margin: 0 0 var(--e2);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+    color: var(--dorado-claro);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.hero-titulo {
+    margin: 0 0 var(--e3);
+    font-size: clamp(3rem, 8vw, 7.5rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 0.9;
+    text-transform: uppercase;
+}
+
+.hero-bajada {
+    max-width: 42ch;
+    margin: 0 0 var(--e4);
+    color: #e8e4dc;
+    font-size: clamp(1.0625rem, 1.4vw, 1.375rem);
+}
+
+/* el texto sube y aparece un poco después que el video, uno tras otro */
+.hero-texto > * {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 700ms var(--curva), transform 700ms var(--curva);
+}
+
+.activa .hero-texto > * {
+    opacity: 1;
+    transform: none;
+}
+
+.activa .hero-texto > :nth-child(1) { transition-delay: 300ms; }
+.activa .hero-texto > :nth-child(2) { transition-delay: 400ms; }
+.activa .hero-texto > :nth-child(3) { transition-delay: 500ms; }
+.activa .hero-texto > :nth-child(4) { transition-delay: 600ms; }
+
+/* controles abajo: pausa y una barra por diapositiva */
+.hero-controles {
+    position: absolute;
+    z-index: 3;
+    left: clamp(16px, 5vw, 96px);
+    right: clamp(16px, 5vw, 96px);
+    bottom: clamp(24px, 4vh, 40px);
+    display: flex;
+    align-items: center;
+    gap: var(--e3);
+}
+
+.hero-controles[hidden] {
+    display: none;
+}
+
+.hero-indicadores {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--e2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* los indicadores son botones, pero sin el fondo hueso de los demás */
+.hero-indicador {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    height: auto;
+    padding: var(--e2) 0 var(--e1);
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.hero-indicador:hover,
+.hero-indicador.activo,
+.hero-indicador[aria-current="true"] {
+    background: transparent;
+    color: #ffffff;
+}
+
+.hero-barra {
+    display: block;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+/* se llena en 7 segundos; al terminar, el JavaScript pasa a la siguiente */
+.hero-progreso {
+    display: block;
+    height: 100%;
+    background: var(--dorado-claro);
+    transform: scaleX(0);
+    transform-origin: left;
+}
+
+.hero-indicador.activo .hero-progreso {
+    animation: hero-avance 7000ms linear forwards;
+}
+
+/* la barra se detiene en pausa y mientras el teclado está sobre el texto */
+.hero.pausado .hero-progreso,
+.hero:has(.hero-diapositivas :focus-visible) .hero-progreso {
+    animation-play-state: paused;
+}
+
+@keyframes hero-avance {
+    to { transform: scaleX(1); }
+}
+
+/* botón redondo de pausa (carrusel y videos de fondo) */
+.boton-pausa {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.25);
+    color: #ffffff;
+}
+
+.boton-pausa:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #ffffff;
+}
+
+.boton-pausa[hidden] {
+    display: none;
+}
+
+/* dos barras = pausar */
+.icono-pausa {
+    display: block;
+    width: 12px;
+    height: 14px;
+    border-left: 4px solid currentColor;
+    border-right: 4px solid currentColor;
+}
+
+/* un triángulo = reproducir */
+.en-pausa .icono-pausa {
+    width: 0;
+    height: 0;
+    margin-left: 3px;
+    border-style: solid;
+    border-width: 7px 0 7px 12px;
+    border-color: transparent transparent transparent currentColor;
+}
+
+/* ---------- secciones ---------- */
+.contenedor {
+    width: min(1440px, 100% - 2 * clamp(16px, 5vw, 96px));
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.seccion {
+    padding: clamp(72px, 11vw, 160px) 0;
+}
+
+.seccion-oscura {
+    background: #0b0d10;
+}
+
+/* palabra pequeña dorada encima de cada título */
+.sobretitulo {
+    margin: 0 0 var(--e2);
+    color: var(--dorado);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.titulo-grande {
+    max-width: 16ch;
+    font-size: clamp(2.25rem, 5vw, 4.5rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+/* quiénes somos: título a la izquierda, texto a la derecha */
+.quienes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(32px, 6vw, 120px);
+    align-items: end;
+}
+
+.quienes-texto p {
+    max-width: 60ch;
+    margin: 0 0 var(--e2);
+    color: var(--gris-claro);
+    font-size: 1.1875rem;
+}
+
+.quienes-texto p:last-child {
+    margin-bottom: 0;
+}
+
+/* cifras: el número grande arriba y su nombre abajo */
+.cifras {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: clamp(56px, 8vw, 112px);
+    margin-bottom: 0;
+    border-top: 1px solid var(--linea);
+}
+
+.cifras div {
+    display: flex;
+    flex-direction: column-reverse;   /* dd (número) arriba, dt (nombre) abajo */
+    gap: var(--e1);
+    padding: var(--e4) var(--e3) 0;
+}
+
+.cifras div:first-child {
+    padding-left: 0;
+}
+
+.cifras div + div {
+    border-left: 1px solid var(--linea);
+}
+
+.cifras dd {
+    margin: 0;
+    font-size: clamp(2.5rem, 5vw, 4.25rem);
+    font-weight: 700;
+    font-stretch: 75%;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.cifras dt {
+    color: var(--gris-claro);
+    font-size: 0.9375rem;
+}
+
+/* destacados: título a la izquierda y "Ver todo" a la derecha */
+.seccion-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--e3);
+    margin-bottom: clamp(32px, 4vw, 56px);
+}
+
+.enlace-flecha {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.enlace-flecha span {
+    display: inline-block;
+    transition: transform 160ms var(--curva);
+}
+
+.enlace-flecha:hover span {
+    transform: translateX(4px);
+}
+
+/* en la portada las tarjetas van siempre de a 4 en pantallas anchas */
+.seccion .tarjetas {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ---------- bandas con video de fondo ---------- */
+.banda {
+    position: relative;
+    isolation: isolate;           /* el video y la sombra quedan detrás del texto */
+    overflow: hidden;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+}
+
+.banda-video {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* sombra de izquierda a derecha: el texto está a la izquierda */
+.banda::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.6) 55%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.banda .video-pausa {
+    position: absolute;
+    right: clamp(16px, 5vw, 96px);
+    bottom: clamp(16px, 4vh, 40px);
+}
+
+.pasos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--e4);
+    margin: clamp(40px, 6vw, 80px) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pasos li {
+    padding-top: var(--e3);
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.paso-numero {
+    display: block;
+    margin-bottom: var(--e2);
+    color: var(--dorado-claro);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+}
+
+.pasos h3 {
+    margin-bottom: var(--e1);
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-stretch: 75%;
+    text-transform: uppercase;
+}
+
+.pasos p {
+    max-width: 34ch;
+    margin: 0;
+    color: #dcd8d0;
+}
+
+/* invitación final: centrada, con sombra pareja */
+.llamado {
+    min-height: 70vh;
+    text-align: center;
+}
+
+.llamado::before {
+    background: rgba(0, 0, 0, 0.62);
+}
+
+.llamado .titulo-grande {
+    margin: 0 auto;
+}
+
+.llamado p {
+    max-width: 46ch;
+    margin: var(--e3) auto var(--e4);
+    color: #e8e4dc;
+    font-size: 1.25rem;
+}
+
+.llamado-botones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--e2);
+}
+
+/* botón con borde blanco (acción secundaria sobre video) */
+.boton-borde {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    padding: 0 var(--e4);
+    border: 1px solid #ffffff;
+    border-radius: 4px;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 160ms var(--curva);
+}
+
+.boton-borde:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* ---------- portada en tableta y celular ---------- */
+@media (max-width: 1199px) {
+    .seccion .tarjetas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .quienes,
+    .pasos {
+        grid-template-columns: 1fr;
+    }
+
+    /* cifras de 2 en 2 */
+    .cifras {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cifras div:nth-child(odd) {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .cifras div:nth-child(n + 3) {
+        border-top: 1px solid var(--linea);
+        margin-top: var(--e4);
+    }
+}
+
+@media (max-width: 700px) {
+    /* en el celular solo se ven las barras; el nombre lo lee el lector igual */
+    .hero-nombre {
+        display: none;
+    }
+
+    .hero-indicadores {
+        gap: var(--e1);
+    }
+
+    .hero-texto {
+        bottom: calc(clamp(24px, 4vh, 40px) + 64px);
+    }
+
+    .logo {
+        width: 180px;
+    }
+
+    .seccion .tarjetas {
+        grid-template-columns: 1fr;
+    }
+
+    .banda .video-pausa {
+        bottom: var(--e2);
+    }
+}
+
+/* menos movimiento: sin intro, sin animación del texto y con todo en pausa */
+@media (prefers-reduced-motion: reduce) {
+    .intro {
+        display: none;
+    }
+
+    .hero-texto > * {
+        opacity: 1;
+        transform: none;
+    }
+
+    .hero-diapositiva {
+        transition: none;
     }
 }

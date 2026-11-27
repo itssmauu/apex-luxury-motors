@@ -6,6 +6,12 @@ require_once __DIR__ . "/../../backend/funciones/acceso.php";
 if (!isset($titulo)) {
     $titulo = "Apex Luxury Motors";
 }
+
+// clase opcional para el <body>: la portada usa "pagina-inicio"
+// para que el logo y el menú vayan encima del video
+if (!isset($claseBody)) {
+    $claseBody = "";
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -14,12 +20,12 @@ if (!isset($titulo)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo htmlspecialchars($titulo); ?> - Apex Luxury Motors (demo)</title>
     <!-- estilos de todo el sitio; subir el ?v= cuando cambie el CSS para que el navegador baje la versión nueva -->
-    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=8">
+    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=9">
 </head>
-<body>
+<body<?php if ($claseBody !== "") { echo ' class="' . htmlspecialchars($claseBody) . '"'; } ?>>
 <header>
-    <!-- logo centrado arriba en todas las páginas (el tamaño y el recorte están en estilos.css) -->
+    <!-- logo centrado arriba en todas las páginas (PNG con fondo transparente) -->
     <a class="logo" href="/apex/frontend/index.php">
-        <img src="/apex/img/logo_apex.png" alt="Apex Luxury Motors, ir al inicio">
+        <img src="/apex/img/logo_apex_transparente.png" alt="Apex Luxury Motors, ir al inicio" width="800" height="394">
     </a>
 </header>
