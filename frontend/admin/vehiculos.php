@@ -6,6 +6,9 @@
 // trae requerirRol() y abre la sesión
 require_once __DIR__ . "/../../backend/funciones/acceso.php";
 require_once __DIR__ . "/../../backend/funciones/vehiculos.php";
+// textos traducidos (t) y nombres de las categorías en el idioma elegido
+require_once __DIR__ . "/../includes/idioma.php";
+require_once __DIR__ . "/../datos/valores.php";
 
 // solo administrador
 requerirRol("administrador");
@@ -15,10 +18,10 @@ $vehiculos = listarInventario();
 
 // cuántos hay de cada tipo (para las cifras de arriba)
 $vistas = [
-    "todos"        => ["nombre" => "En inventario",       "cantidad" => 0],
-    "disponibles"  => ["nombre" => "Disponibles",         "cantidad" => 0],
-    "vendidos"     => ["nombre" => "Vendidos",            "cantidad" => 0],
-    "desactivados" => ["nombre" => "Fuera del catálogo",  "cantidad" => 0],
+    "todos"        => ["nombre" => t("admin.en_inventario"),  "cantidad" => 0],
+    "disponibles"  => ["nombre" => t("admin.disponibles"),    "cantidad" => 0],
+    "vendidos"     => ["nombre" => t("admin.vendidos"),       "cantidad" => 0],
+    "desactivados" => ["nombre" => t("admin.fuera_catalogo"), "cantidad" => 0],
 ];
 
 // a qué vista pertenece un vehículo
@@ -54,7 +57,7 @@ foreach ($vehiculos as $v) {
     }
 }
 
-$titulo = "Inventario";
+$titulo = t("menu.inventario");
 
 require_once __DIR__ . "/../includes/encabezado.php";
 require_once __DIR__ . "/../includes/menu.php";
@@ -64,23 +67,23 @@ require_once __DIR__ . "/../includes/menu.php";
     <!-- encabezado: título a la izquierda y "Agregar vehículo" a la derecha -->
     <div class="inventario-cabecera">
         <div>
-            <p class="sobretitulo">Panel de administración</p>
-            <h1>Inventario</h1>
+            <p class="sobretitulo"><?php echo htmlspecialchars(t("admin.panel")); ?></p>
+            <h1><?php echo htmlspecialchars(t("menu.inventario")); ?></h1>
         </div>
         <a class="boton inventario-agregar" href="/apex/frontend/admin/vehiculo_form.php">
-            <span aria-hidden="true">+</span> Agregar vehículo
+            <span aria-hidden="true">+</span> <?php echo htmlspecialchars(t("admin.agregar")); ?>
         </a>
     </div>
 
     <!-- cifras: cada una es también un filtro -->
-    <nav class="inventario-filtros" aria-label="Filtrar inventario">
+    <nav class="inventario-filtros" aria-label="<?php echo htmlspecialchars(t("admin.filtrar_aria")); ?>">
         <ul>
             <?php foreach ($vistas as $clave => $vista): ?>
                 <li>
                     <a href="?vista=<?php echo $clave; ?>"
                        <?php if ($clave === $vistaActual) { echo 'aria-current="page"'; } ?>>
                         <span class="inventario-cifra"><?php echo $vista["cantidad"]; ?></span>
-                        <span class="inventario-cifra-nombre"><?php echo $vista["nombre"]; ?></span>
+                        <span class="inventario-cifra-nombre"><?php echo htmlspecialchars($vista["nombre"]); ?></span>
                     </a>
                 </li>
             <?php endforeach; ?>
@@ -89,9 +92,9 @@ require_once __DIR__ . "/../includes/menu.php";
 
     <?php if (count($vehiculosVista) === 0): ?>
         <div class="inventario-vacio">
-            <p><?php echo (count($vehiculos) === 0) ? "No hay vehículos registrados." : "No hay vehículos en esta vista."; ?></p>
+            <p><?php echo htmlspecialchars((count($vehiculos) === 0) ? t("admin.sin_vehiculos") : t("admin.vista_vacia")); ?></p>
             <?php if ($vistaActual !== "todos"): ?>
-                <a href="?vista=todos">Ver todo el inventario</a>
+                <a href="?vista=todos"><?php echo htmlspecialchars(t("admin.ver_todo_inventario")); ?></a>
             <?php endif; ?>
         </div>
     <?php else: ?>
@@ -110,12 +113,12 @@ require_once __DIR__ . "/../includes/menu.php";
                             <img src="/apex/<?php echo htmlspecialchars($v["foto"]); ?>" alt=""
                                  width="320" height="200" <?php if ($numero > 3) { echo 'loading="lazy"'; } ?>>
                         <?php else: ?>
-                            <span>Sin foto</span>
+                            <span><?php echo htmlspecialchars(t("admin.sin_foto")); ?></span>
                         <?php endif; ?>
                     </div>
 
                     <div class="inventario-datos">
-                        <p class="inventario-categoria"><?php echo htmlspecialchars($v["categoria"]); ?></p>
+                        <p class="inventario-categoria"><?php echo htmlspecialchars(nombreCategoria($v["categoria"])); ?></p>
                         <h3 class="inventario-nombre">
                             <span class="inventario-marca"><?php echo htmlspecialchars($v["marca"]); ?></span>
                             <?php echo htmlspecialchars($v["modelo"]); ?>
@@ -123,12 +126,12 @@ require_once __DIR__ . "/../includes/menu.php";
                         <!-- estado: el texto siempre lo dice, el color solo ayuda -->
                         <p class="inventario-sellos">
                             <?php if ($v["estado"] === "vendido"): ?>
-                                <span class="estado-sello estado-sello-vendido">Vendido</span>
+                                <span class="estado-sello estado-sello-vendido"><?php echo htmlspecialchars(t("estado_vehiculo.vendido")); ?></span>
                             <?php else: ?>
-                                <span class="estado-sello estado-sello-disponible">Disponible</span>
+                                <span class="estado-sello estado-sello-disponible"><?php echo htmlspecialchars(t("estado_vehiculo.disponible")); ?></span>
                             <?php endif; ?>
                             <?php if (!$activo): ?>
-                                <span class="estado-sello estado-sello-oculto">Fuera del catálogo</span>
+                                <span class="estado-sello estado-sello-oculto"><?php echo htmlspecialchars(t("admin.fuera_catalogo")); ?></span>
                             <?php endif; ?>
                         </p>
                     </div>
@@ -141,21 +144,21 @@ require_once __DIR__ . "/../includes/menu.php";
                         <?php if ($activo): ?>
                             <!-- la página pública del vehículo (solo existe si está en el catálogo) -->
                             <a class="inventario-ver" href="/apex/frontend/vehiculo.php?id=<?php echo (int) $v["id"]; ?>"
-                               aria-label="Ver <?php echo htmlspecialchars($nombreVehiculo); ?> en el sitio">
-                                Ver en el sitio <span aria-hidden="true">→</span>
+                               aria-label="<?php echo htmlspecialchars(t("admin.ver_sitio_aria", $nombreVehiculo)); ?>">
+                                <?php echo htmlspecialchars(t("admin.ver_sitio")); ?> <span aria-hidden="true">→</span>
                             </a>
                         <?php endif; ?>
 
                         <a class="boton-linea" href="/apex/frontend/admin/vehiculo_form.php?id=<?php echo (int) $v["id"]; ?>"
-                           aria-label="Editar <?php echo htmlspecialchars($nombreVehiculo); ?>">Editar</a>
+                           aria-label="<?php echo htmlspecialchars(t("admin.editar_aria", $nombreVehiculo)); ?>"><?php echo htmlspecialchars(t("admin.editar")); ?></a>
 
                         <!-- solo se desactiva si está activo; el backend lo vuelve a validar -->
                         <?php if ($activo): ?>
                             <form method="post" action="/apex/backend/procesos/vehiculo_desactivar.php">
                                 <input type="hidden" name="id" value="<?php echo (int) $v["id"]; ?>">
                                 <button type="submit" class="boton-quitar"
-                                        aria-label="Desactivar <?php echo htmlspecialchars($nombreVehiculo); ?>">
-                                    Desactivar
+                                        aria-label="<?php echo htmlspecialchars(t("admin.desactivar_aria", $nombreVehiculo)); ?>">
+                                    <?php echo htmlspecialchars(t("admin.desactivar")); ?>
                                 </button>
                             </form>
                         <?php endif; ?>

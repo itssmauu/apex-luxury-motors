@@ -14,19 +14,27 @@
     var previaPrecio = document.getElementById("previa-precio");
     var previaSello = document.getElementById("previa-sello");
 
+    // textos traducidos que manda PHP (data-texto-*); el español queda de respaldo
+    var formulario = document.querySelector(".ficha-admin-form");
+    var textos = formulario ? formulario.dataset : {};
+
     if (marca && previaNombre) {
         // número con comas, sin decimales: 239900 -> $239,900
         var formato = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
         var actualizar = function () {
             var nombre = (marca.value + " " + modelo.value).trim();
-            previaNombre.textContent = nombre !== "" ? nombre : "Marca y modelo";
-            previaCategoria.textContent = categoria.value !== "" ? categoria.value : "Categoría";
+            previaNombre.textContent = nombre !== "" ? nombre : (textos.textoNombre || "Marca y modelo");
+            // el nombre de la categoría ya traducido es el texto de la opción elegida
+            var opcion = categoria.options[categoria.selectedIndex];
+            previaCategoria.textContent = categoria.value !== "" ? opcion.textContent.trim() : (textos.textoCategoria || "Categoría");
             var valor = parseFloat(precio.value);
             previaPrecio.textContent = "$" + (isNaN(valor) ? "0" : formato.format(valor));
 
             var vendido = document.querySelector('input[name="estado"][value="vendido"]').checked;
-            previaSello.textContent = vendido ? "Vendido" : "Disponible";
+            previaSello.textContent = vendido
+                ? (textos.textoVendido || "Vendido")
+                : (textos.textoDisponible || "Disponible");
             previaSello.classList.toggle("sello-vendido", vendido);
         };
 
@@ -45,7 +53,9 @@
     var nombreFoto = document.getElementById("nombre-foto");
     if (archivo && nombreFoto) {
         archivo.addEventListener("change", function () {
-            nombreFoto.textContent = archivo.files.length > 0 ? archivo.files[0].name : "Elegir foto";
+            nombreFoto.textContent = archivo.files.length > 0
+                ? archivo.files[0].name
+                : (nombreFoto.dataset.textoElegir || "Elegir foto");
             archivo.closest(".fotos-admin-subir").classList.toggle("con-archivo", archivo.files.length > 0);
         });
     }
