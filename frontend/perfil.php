@@ -21,14 +21,14 @@ require_once __DIR__ . "/includes/encabezado.php";
 require_once __DIR__ . "/includes/menu.php";
 ?>
 
-<main>
+<main class="pagina-formulario">
     <h1>Mi perfil</h1>
 
     <!-- el formulario va por POST al proceso del backend, que valida, guarda y vuelve aquí -->
     <form method="post" action="/apex/backend/procesos/perfil_guardar.php">
         <p>
             <label for="nombre">Nombre completo</label><br>
-            <input type="text" id="nombre" name="nombre" required
+            <input type="text" id="nombre" name="nombre" required autocomplete="name"
                    value="<?php echo htmlspecialchars($perfil["nombre"]); ?>">
         </p>
 
@@ -56,6 +56,14 @@ require_once __DIR__ . "/includes/menu.php";
             <button type="submit">Guardar cambios</button>
         </p>
     </form>
+
+    <!-- salidas de la página ("Mis solicitudes" solo es para clientes) -->
+    <p class="enlaces-salida">
+        <?php if (rolActual() === "cliente"): ?>
+            <a href="mis_solicitudes.php">Mis solicitudes</a>
+        <?php endif; ?>
+        <a class="volver" href="catalogo.php"><span class="flecha" aria-hidden="true">←</span> Volver al catálogo</a>
+    </p>
 </main>
 
 <?php require_once __DIR__ . "/includes/pie.php"; ?>

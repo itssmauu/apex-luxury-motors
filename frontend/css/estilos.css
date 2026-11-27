@@ -46,7 +46,7 @@ body {
 main {
     max-width: 2200px;
     margin: 0 auto;
-    padding: var(--e6) var(--e3) var(--e6);
+    padding: var(--e4) var(--e3) var(--e6);   /* arriba menos aire: ya está el encabezado */
 }
 
 /* el detalle usa todo el ancho de la ventana, con un relleno pequeño a los lados */
@@ -93,14 +93,22 @@ a:hover {
 a:focus-visible,
 button:focus-visible,
 select:focus-visible,
-input:focus-visible {
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
     outline: 3px solid var(--dorado);
     outline-offset: 2px;
 }
 
 /* ---------- campos y botones ---------- */
+/* todos los campos de texto con el mismo estilo que el buscador del catálogo */
 select,
-input[type="number"] {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+textarea {
     font: inherit;
     font-size: 1rem;
     color: var(--hueso);
@@ -110,6 +118,21 @@ input[type="number"] {
     padding: 0 12px;
     border: 1px solid var(--borde-campo);
     border-radius: 4px;
+}
+
+/* el área de texto crece hacia abajo, no tiene alto fijo */
+textarea {
+    height: auto;
+    min-height: 120px;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+/* el campo para subir fotos (admin) */
+input[type="file"] {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--hueso);
 }
 
 /* las opciones de la lista también oscuras (Windows) */
@@ -180,9 +203,14 @@ button:disabled {
     line-height: 44px;
 }
 
-/* logo TEMPORAL: pasa a la plantilla.
+/* ---------- plantilla: encabezado, menú, avisos y pie ---------- */
+/* el logo va centrado arriba en todas las páginas.
    La imagen tiene fondo negro y el nombre ocupa solo el centro,
    así que se recorta y se "funde" con el fondo de la página */
+header {
+    padding: var(--e3) clamp(16px, 2vw, 32px) 0;
+}
+
 .logo {
     display: block;
     position: relative;
@@ -190,13 +218,7 @@ button:disabled {
     height: 136px;                /* el nombre queda de unos 260 px de ancho */
     overflow: hidden;
     border-radius: 4px;
-    margin-bottom: var(--e3);
-}
-
-/* en el detalle el logo va centrado arriba */
-.logo-centrado {
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
 }
 
 .logo img {
@@ -207,6 +229,320 @@ button:disabled {
     max-width: none;
     height: auto;
     mix-blend-mode: lighten;      /* el negro de la imagen toma el color del fondo */
+}
+
+/* menú: horizontal y centrado debajo del logo; en el celular baja de línea, no se sale */
+nav {
+    border-bottom: 1px solid var(--linea);
+}
+
+nav ul {
+    list-style: none;
+    margin: 0 auto;
+    padding: var(--e1) clamp(16px, 2vw, 32px) var(--e2);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px var(--e3);
+}
+
+/* "Hola, nombre" no es enlace: va en gris */
+nav li {
+    color: var(--gris-claro);
+    font-size: 0.9375rem;
+}
+
+nav a {
+    display: inline-block;
+    padding: var(--e1) 4px;
+    color: var(--hueso);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+nav a:hover {
+    color: var(--dorado-claro);
+    text-decoration: underline;
+}
+
+/* avisos de éxito o error que deja el backend (role="status" / "alert" en mensajes.php) */
+.mensaje {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(760px, 100% - 32px);
+    margin: var(--e3) auto 0;
+    padding: 14px var(--e2);
+    border-radius: 4px;
+    border-left: 4px solid;
+    color: var(--hueso);
+}
+
+/* un símbolo distinto en cada tipo, así no depende solo del color
+   (el "/ ''" hace que el lector de pantalla no lo lea) */
+.mensaje::before {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-weight: 700;
+    color: var(--fondo);
+}
+
+.mensaje-exito {
+    background: var(--tarjeta);
+    border-left-color: var(--dorado);
+}
+
+.mensaje-exito::before {
+    content: "✓" / "";
+    background: var(--dorado);
+}
+
+.mensaje-error {
+    background: var(--rojo-fondo);
+    border-left-color: var(--rojo-vendido);
+}
+
+.mensaje-error::before {
+    content: "!" / "";
+    background: var(--rojo-vendido);
+}
+
+/* pie de página */
+footer {
+    border-top: 1px solid var(--linea);
+    padding: var(--e3) clamp(16px, 2vw, 32px);
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--gris-claro);
+}
+
+footer p {
+    margin: 0;
+}
+
+/* ---------- formularios sueltos (login, registro, perfil y los de admin) ---------- */
+/* solo los formularios que están directo en la página, no el del buscador */
+main > form {
+    max-width: 640px;
+}
+
+main > form p {
+    margin: 0 0 var(--e2);
+}
+
+main > form label {
+    display: block;
+    margin-bottom: var(--e1);
+    font-size: 0.875rem;
+    color: var(--gris-claro);
+}
+
+/* el <br> después de cada etiqueta ya no hace falta: la etiqueta va arriba sola */
+main > form label + br {
+    display: none;
+}
+
+main > form h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: var(--e3) 0 var(--e1);
+}
+
+/* login, registro y perfil: el formulario en una tarjeta centrada */
+.pagina-formulario {
+    width: min(480px, 100% - 32px);
+    margin: var(--e4) auto var(--e6);
+    padding: var(--e4);
+    background: var(--tarjeta);
+    border-radius: 4px;
+}
+
+.pagina-formulario h1 {
+    font-size: 2.25rem;
+    margin-bottom: var(--e3);
+}
+
+/* botón principal dorado, a todo el ancho de la tarjeta */
+.pagina-formulario button {
+    width: 100%;
+    height: 48px;
+    background: var(--dorado);
+    color: var(--fondo);
+}
+
+.pagina-formulario button:hover {
+    background: var(--dorado-claro);
+}
+
+.pagina-formulario > p {
+    margin: var(--e3) 0 0;
+    color: var(--gris-claro);
+}
+
+/* enlaces de salida del perfil, uno al lado del otro */
+.enlaces-salida {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e1) var(--e3);
+}
+
+/* ---------- portada (index) ---------- */
+.portada {
+    max-width: 760px;
+    padding-top: clamp(48px, 12vh, 140px);
+    text-align: center;
+}
+
+.portada h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    margin-bottom: var(--e3);
+}
+
+.portada p {
+    font-size: 1.25rem;
+    color: var(--gris-claro);
+    margin: 0 0 var(--e4);
+}
+
+/* enlace que se ve como botón dorado ("Ver el catálogo") */
+.boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    padding: 0 var(--e4);
+    border-radius: 4px;
+    background: var(--dorado);
+    color: var(--fondo);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 160ms var(--curva);
+}
+
+.boton:hover {
+    background: var(--dorado-claro);
+    color: var(--fondo);
+    text-decoration: none;
+}
+
+/* ---------- tablas (mis solicitudes y las de admin) ---------- */
+/* mismo estilo que las tablas de especificaciones */
+main table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+main caption {
+    text-align: left;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    padding-bottom: var(--e1);
+}
+
+main th,
+main td {
+    text-align: left;
+    vertical-align: middle;
+    padding: 12px var(--e2) 12px 0;
+    border-top: 1px solid var(--linea);
+}
+
+main thead th {
+    font-weight: 400;
+    font-size: 0.9375rem;
+    color: var(--gris-claro);
+}
+
+/* botones dentro de una tabla (Cancelar, Desactivar): más bajos y con borde */
+main td button {
+    height: 36px;
+    padding: 0 var(--e2);
+    background: transparent;
+    color: var(--hueso);
+    border: 1px solid var(--borde-campo);
+}
+
+main td button:hover {
+    background: var(--campo);
+    border-color: var(--hueso);
+}
+
+/* la tabla de mis solicitudes va en un recuadro; en el celular se desliza de lado */
+.tabla-desplazable {
+    overflow-x: auto;
+    background: var(--tarjeta);
+    border-radius: 4px;
+    padding: var(--e2) var(--e3);
+    margin-bottom: var(--e3);
+}
+
+.tabla-desplazable table {
+    min-width: 640px;
+}
+
+/* estados de la solicitud: el texto siempre dice el estado, el color solo ayuda */
+.estado-rechazada {
+    color: var(--rojo-vendido);
+    font-weight: 600;
+}
+
+.estado-aprobada {
+    color: var(--dorado);
+    font-weight: 600;
+}
+
+.estado-cancelada {
+    color: var(--gris-claro);
+}
+
+/* ---------- "Volver al catálogo": enlace que se ve como botón secundario ---------- */
+/* (detalle del vehículo y perfil) */
+.volver {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e1);
+    min-height: 44px;
+    padding: 0 20px;
+    margin: 0 0 var(--e3);        /* aire debajo, antes del título */
+    border: 1px solid var(--dorado);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--dorado);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 160ms var(--curva), color 160ms var(--curva);
+}
+
+.volver:hover {
+    background: rgba(186, 154, 107, 0.12);   /* dorado suave */
+    color: var(--dorado-claro);
+    text-decoration: none;
+}
+
+/* la flecha se mueve un poco a la izquierda al pasar el mouse */
+.volver .flecha {
+    display: inline-block;
+    line-height: 1;
+    transition: transform 160ms var(--curva);
+}
+
+.volver:hover .flecha {
+    transform: translateX(-3px);
+}
+
+/* en el perfil va junto a "Mis solicitudes", sin margen extra */
+.enlaces-salida {
+    align-items: center;
+}
+
+.enlaces-salida .volver {
+    margin: 0;
 }
 
 /* ---------- catálogo: tarjetas ---------- */
@@ -642,6 +978,13 @@ p.vendido {
     .especificaciones th {
         width: 7.5em;
     }
+
+    /* "Volver al catálogo" a todo el ancho, más fácil de tocar */
+    .volver {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* si la persona pidió menos movimiento en su equipo */
@@ -657,6 +1000,11 @@ p.vendido {
     /* sin acercamiento de la foto */
     .tarjeta:hover img,
     .tarjeta:focus-within img {
+        transform: none;
+    }
+
+    /* la flecha de "Volver al catálogo" no se mueve */
+    .volver:hover .flecha {
         transform: none;
     }
 }

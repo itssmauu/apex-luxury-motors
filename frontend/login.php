@@ -16,7 +16,7 @@ require_once __DIR__ . "/includes/encabezado.php";
 require_once __DIR__ . "/includes/menu.php";
 ?>
 
-<main>
+<main class="pagina-formulario">
     <h1>Iniciar sesión</h1>
 
     <!-- el formulario va por POST al proceso del backend, que valida y redirige -->

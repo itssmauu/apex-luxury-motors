@@ -47,37 +47,20 @@ $tablasTecnicas = [
     "Tracción y peso" => ["Tracción", "Peso"],
 ];
 
-// AQUÍ VA LA PLANTILLA DE ENZO (encabezado, menú y mensajes):
-// require_once __DIR__ . "/includes/encabezado.php";
-// require_once __DIR__ . "/includes/menu.php";
-
-// TEMPORAL: inicio de la página hecho a mano (de aquí hasta FIN TEMPORAL),
-// se borra cuando esté la plantilla
+// plantilla común: encabezado con el logo, menú según el rol y mensajes
+require_once __DIR__ . "/includes/encabezado.php";
+require_once __DIR__ . "/includes/menu.php";
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo htmlspecialchars($titulo); ?> - Apex Luxury Motors (demo)</title>
-    <!-- estilos de todo el sitio (cuando esté la plantilla, este enlace pasa a encabezado.php) -->
-    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=6">
-</head>
-<body>
-<!-- FIN TEMPORAL -->
 
 <main>
-    <!-- TEMPORAL: pasa a la plantilla -->
-    <!-- logo centrado arriba, lleva al catálogo (el recorte del fondo negro está en estilos.css) -->
-    <a class="logo logo-centrado" href="catalogo.php">
-        <img src="/apex/img/logo_apex.png" alt="Apex Luxury Motors, volver al catálogo" width="2752" height="1536">
-    </a>
-
     <?php if ($vehiculo === null): ?>
         <h1>Vehículo no encontrado</h1>
         <p>El vehículo que buscas no existe o ya no está en el catálogo.</p>
         <p><a href="catalogo.php">Volver al catálogo</a></p>
     <?php else: ?>
+        <!-- salida hacia el catálogo (va antes del título para no separarlo de la ficha);
+             se ve como botón, pero es un enlace. La flecha es decorativa -->
+        <a class="volver" href="catalogo.php"><span class="flecha" aria-hidden="true">←</span> Volver al catálogo</a>
         <h1><?php echo htmlspecialchars($vehiculo["marca"] . " " . $vehiculo["modelo"]); ?></h1>
 
         <!-- dos columnas: a la izquierda fotos y ficha, a la derecha las especificaciones
@@ -193,10 +176,4 @@ $tablasTecnicas = [
     <?php endif; ?>
 </main>
 
-<?php
-// AQUÍ VA EL PIE DE LA PLANTILLA DE ENZO:
-// require_once __DIR__ . "/includes/pie.php";
-?>
-<!-- TEMPORAL: cierre de la página hecho a mano, se borra cuando esté la plantilla -->
-</body>
-</html>
+<?php require_once __DIR__ . "/includes/pie.php"; ?>

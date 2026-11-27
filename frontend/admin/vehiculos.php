@@ -25,8 +25,10 @@ require_once __DIR__ . "/../includes/menu.php";
     <?php if (count($vehiculos) === 0): ?>
         <p>No hay vehículos registrados.</p>
     <?php else: ?>
+        <!-- en el celular la tabla se desliza de lado dentro de este recuadro (tabindex para moverla con el teclado) -->
+        <div class="tabla-desplazable" role="region" aria-labelledby="titulo-tabla" tabindex="0">
         <table>
-            <caption>Todos los vehículos</caption>
+            <caption id="titulo-tabla">Todos los vehículos</caption>
             <thead>
                 <tr>
                     <th scope="col">Foto</th>
@@ -75,6 +77,7 @@ require_once __DIR__ . "/../includes/menu.php";
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </main>
 
