@@ -6,6 +6,8 @@
 require_once __DIR__ . "/../backend/funciones/vehiculos.php";
 // esta segunda línea es para rolActual() (y también abre la sesión)
 require_once __DIR__ . "/../backend/funciones/acceso.php";
+// especificaciones técnicas: están en un archivo aparte porque la base no las guarda
+require_once __DIR__ . "/datos/especificaciones.php";
 
 // el id viene en la dirección: vehiculo.php?id=8
 $id = isset($_GET["id"]) && is_string($_GET["id"]) ? $_GET["id"] : 0;
@@ -33,6 +35,18 @@ if ($vehiculo !== null && count($vehiculo["fotos"]) > 0) {
     }
 }
 
+// especificaciones de este vehículo (si no hay, la sección no se muestra)
+$fichaTecnica = [];
+if ($vehiculo !== null && isset($especificaciones[(int) $vehiculo["id"]])) {
+    $fichaTecnica = $especificaciones[(int) $vehiculo["id"]];
+}
+
+// qué filas van en cada tabla
+$tablasTecnicas = [
+    "Motor y rendimiento" => ["Motor", "Cilindrada", "Potencia", "Torque", "Aceleración", "Velocidad máxima"],
+    "Tracción y peso" => ["Tracción", "Peso"],
+];
+
 // AQUÍ VA LA PLANTILLA DE ENZO (encabezado, menú y mensajes):
 // require_once __DIR__ . "/includes/encabezado.php";
 // require_once __DIR__ . "/includes/menu.php";
@@ -46,23 +60,19 @@ if ($vehiculo !== null && count($vehiculo["fotos"]) > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo htmlspecialchars($titulo); ?> - Apex Luxury Motors (demo)</title>
+    <!-- estilos de todo el sitio (cuando esté la plantilla, este enlace pasa a encabezado.php) -->
+    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=6">
 </head>
 <body>
 <!-- FIN TEMPORAL -->
 
-<!-- estilos básicos TEMPORALES, se pueden borrar cuando haya hoja de estilos -->
-<style>
-    .detalle { display: flex; flex-wrap: wrap; gap: 24px; }
-    .fotos { width: 480px; max-width: 100%; }
-    .fotos .principal { width: 100%; height: auto; border-radius: 6px; }
-    .miniaturas { display: flex; gap: 8px; margin-top: 8px; }
-    .miniaturas img { width: 90px; height: 60px; object-fit: cover; border: 1px solid #ccc; }
-    .datos { flex: 1; min-width: 260px; }
-    .accion { margin-top: 20px; }
-    .vendido { color: #b00000; font-weight: bold; }
-</style>
-
 <main>
+    <!-- TEMPORAL: pasa a la plantilla -->
+    <!-- logo centrado arriba, lleva al catálogo (el recorte del fondo negro está en estilos.css) -->
+    <a class="logo logo-centrado" href="catalogo.php">
+        <img src="/apex/img/logo_apex.png" alt="Apex Luxury Motors, volver al catálogo" width="2752" height="1536">
+    </a>
+
     <?php if ($vehiculo === null): ?>
         <h1>Vehículo no encontrado</h1>
         <p>El vehículo que buscas no existe o ya no está en el catálogo.</p>
@@ -70,7 +80,10 @@ if ($vehiculo !== null && count($vehiculo["fotos"]) > 0) {
     <?php else: ?>
         <h1><?php echo htmlspecialchars($vehiculo["marca"] . " " . $vehiculo["modelo"]); ?></h1>
 
-        <div class="detalle">
+        <!-- dos columnas: a la izquierda fotos y ficha, a la derecha las especificaciones
+             (la clase extra solo se pone si este auto tiene especificaciones) -->
+        <div class="detalle<?php if (count($fichaTecnica) > 0) { echo " con-especificaciones"; } ?>">
+            <div class="columna-principal">
             <!-- fotos: la primera es la principal y todas salen como miniaturas -->
             <section class="fotos">
                 <?php if (count($vehiculo["fotos"]) > 0): ?>
@@ -101,7 +114,7 @@ if ($vehiculo !== null && count($vehiculo["fotos"]) > 0) {
             <section class="datos">
                 <p><strong>Marca:</strong> <?php echo htmlspecialchars($vehiculo["marca"]); ?></p>
                 <p><strong>Modelo:</strong> <?php echo htmlspecialchars($vehiculo["modelo"]); ?></p>
-                <p><strong>Precio:</strong> $<?php echo number_format((float) $vehiculo["precio"], 0, ".", ","); ?> USD</p>
+                <p class="precio"><strong>Precio:</strong> $<?php echo number_format((float) $vehiculo["precio"], 0, ".", ","); ?> USD</p>
                 <p><strong>Categoría:</strong> <?php echo htmlspecialchars($vehiculo["categoria"]); ?></p>
                 <p>
                     <strong>Estado:</strong>
@@ -141,6 +154,41 @@ if ($vehiculo !== null && count($vehiculo["fotos"]) > 0) {
                     </div>
                 <?php endif; ?>
             </section>
+            </div>
+
+            <!-- especificaciones técnicas (solo si este auto tiene datos) -->
+            <?php if (count($fichaTecnica) > 0): ?>
+                <section class="especificaciones" aria-labelledby="titulo-especificaciones">
+                    <h2 id="titulo-especificaciones">Especificaciones técnicas</h2>
+
+                    <?php foreach ($tablasTecnicas as $nombreTabla => $filas): ?>
+                        <?php
+                        // solo las filas que tienen dato, para no mostrar tablas vacías
+                        $filasConDato = [];
+                        foreach ($filas as $fila) {
+                            if (isset($fichaTecnica[$fila]) && $fichaTecnica[$fila] !== "") {
+                                $filasConDato[$fila] = $fichaTecnica[$fila];
+                            }
+                        }
+                        ?>
+                        <?php if (count($filasConDato) > 0): ?>
+                            <table>
+                                <caption><?php echo htmlspecialchars($nombreTabla); ?></caption>
+                                <tbody>
+                                    <?php foreach ($filasConDato as $dato => $valor): ?>
+                                        <tr>
+                                            <th scope="row"><?php echo htmlspecialchars($dato); ?></th>
+                                            <td><?php echo htmlspecialchars($valor); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+
+                    <p class="nota">Cifras de referencia obtenidas de fuentes públicas; pueden variar según el mercado y el año del modelo.</p>
+                </section>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </main>

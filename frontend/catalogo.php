@@ -38,22 +38,20 @@ $titulo = "Catálogo";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Catálogo - Apex Luxury Motors (demo)</title>
+    <!-- estilos de todo el sitio (cuando esté la plantilla, este enlace pasa a encabezado.php) -->
+    <!-- el ?v=2 obliga al navegador a bajar la versión nueva (subir el número cuando cambie el CSS) -->
+    <link rel="stylesheet" href="/apex/frontend/css/estilos.css?v=6">
 </head>
 <body>
 <!-- FIN TEMPORAL -->
 
-<!-- estilos básicos TEMPORALES, se pueden borrar cuando haya hoja de estilos -->
-<style>
-    .filtros { margin-bottom: 24px; }
-    .filtros label { display: inline-block; margin: 0 12px 8px 0; }
-    .tarjetas { display: flex; flex-wrap: wrap; gap: 16px; }
-    .tarjeta { width: 240px; border: 1px solid #ccc; border-radius: 6px; padding: 12px; }
-    .tarjeta img { width: 100%; height: 150px; object-fit: cover; }
-    .tarjeta h3 { margin: 8px 0; font-size: 1.05em; }
-    .vendido { color: #b00000; font-weight: bold; }
-</style>
-
 <main>
+    <!-- TEMPORAL: pasa a la plantilla -->
+    <!-- logo arriba a la izquierda, lleva al catálogo (el recorte del fondo negro está en estilos.css) -->
+    <a class="logo" href="catalogo.php">
+        <img src="/apex/img/logo_apex.png" alt="Apex Luxury Motors (demo)" width="2752" height="1536">
+    </a>
+
     <h1>Catálogo de vehículos</h1>
 
     <!-- Buscar vehículos: el formulario manda los filtros por la dirección -->
@@ -123,7 +121,7 @@ $titulo = "Catálogo";
                         <?php endif; ?>
 
                         <h3><?php echo htmlspecialchars($v["marca"] . " " . $v["modelo"]); ?></h3>
-                        <p>Precio: $<?php echo number_format((float) $v["precio"], 0, ".", ","); ?> USD</p>
+                        <p class="precio">Precio: $<?php echo number_format((float) $v["precio"], 0, ".", ","); ?> USD</p>
                         <p>
                             Estado:
                             <?php if ($v["estado"] === "vendido"): ?>
